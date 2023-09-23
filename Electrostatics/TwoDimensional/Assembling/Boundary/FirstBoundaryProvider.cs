@@ -15,13 +15,13 @@ public class FirstBoundaryProvider
         _u = u;
     }
 
-    public FirstConditionValue[] GetConditions(int[] elementsIndexes, Bound[] bounds)
+    public FirstConditionValue[] GetConditions(FirstCondition[] conditions)
     {
-        var conditions = new List<FirstConditionValue>(elementsIndexes.Length);
+        var conditionsValues = new FirstConditionValue[conditions.Length];
 
-        for (var i = 0; i < elementsIndexes.Length; i++)
+        for (var i = 0; i < conditions.Length; i++)
         {
-            var (indexes, _) = _grid.Elements[elementsIndexes[i]].GetBoundNodeIndexes(bounds[i]);
+            var (indexes, _) = _grid.Elements[conditions[i].ElementIndex].GetBoundNodeIndexes(conditions[i].Bound);
 
             var values = new double[indexes.Length];
 
@@ -30,24 +30,22 @@ public class FirstBoundaryProvider
                 values[j] = Calculate(indexes[j]);
             }
 
-            conditions.Add(new FirstConditionValue(indexes, values));
+            conditionsValues[i] = new FirstConditionValue(indexes, values);
         }
 
-        return conditions.ToArray();
+        return conditionsValues;
     }
 
-    public FirstCondition[] GetConditions(int elementsByLength, int elementsByHeight)
+    public FirstConditionValue[] GetConditions(int elementsByLength, int elementsByHeight)
     {
-        var elementsIndexes = new List<int>(elementsByHeight);
-        var bounds = new List<Bound>(elementsByHeight);
+        var conditions = new FirstCondition[elementsByHeight];
 
         for (var i = 0; i < elementsByHeight; i++)
         {
-            elementsIndexes.Add((i + 1) * elementsByLength - 1);
-            bounds.Add(Bound.Right);
+            conditions[i] = new FirstCondition((i + 1) * elementsByLength - 1, Bound.Right);
         }
 
-        return GetConditions(elementsIndexes.ToArray(), bounds.ToArray());
+        return GetConditions(conditions);
     }
 
     private double Calculate(int index)

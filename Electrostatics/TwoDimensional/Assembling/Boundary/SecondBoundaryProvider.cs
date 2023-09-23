@@ -39,12 +39,13 @@ public class SecondBoundaryProvider
         _templateMatrixZ = templateMatrixProviderZ.GetMatrix();
     }
 
-    public SecondCondition[] GetConditions(int[] elementsIndexes, Bound[] bounds)
+    public SecondConditionValue[] GetConditions(SecondCondition[] conditions)
     {
-        var conditions = new List<SecondCondition>(elementsIndexes.Length);
+        var conditionsValue = new SecondConditionValue[conditions.Length];
+
         if (_vectors is null)
         {
-            _vectors = new BaseVector[elementsIndexes.Length];
+            _vectors = new BaseVector[conditions.Length];
 
             for (var i = 0; i < _vectors.Length; i++)
             {
@@ -52,25 +53,25 @@ public class SecondBoundaryProvider
             }
         }
 
-        for (var i = 0; i < elementsIndexes.Length; i++)
+        for (var i = 0; i < conditions.Length; i++)
         {
-            var (indexes, h) = _grid.Elements[elementsIndexes[i]].GetBoundNodeIndexes(bounds[i]);
+            var (indexes, h) = _grid.Elements[conditions[i].ElementIndex].GetBoundNodeIndexes(conditions[i].Bound);
 
-            var sigma = _materialFactory.GetById(_grid.Elements[elementsIndexes[i]].MaterialId).Sigma;
+            var sigma = _materialFactory.GetById(_grid.Elements[conditions[i].ElementIndex].MaterialId).Sigma;
 
-            if (bounds[i] == Bound.Left || bounds[i] == Bound.Right)
+            if (conditions[i].Bound == Bound.Left || conditions[i].Bound == Bound.Right)
             {
-                _vectors[i] = GetRVector(indexes, bounds[i], h, sigma, _vectors[i]);
+                _vectors[i] = GetRVector(indexes, conditions[i].Bound, h, sigma, _vectors[i]);
             }
             else
             {
-                _vectors[i] = GetZVector(indexes, bounds[i], h, sigma, _vectors[i]);
+                _vectors[i] = GetZVector(indexes, conditions[i].Bound, h, sigma, _vectors[i]);
             }
 
-            conditions.Add(new SecondCondition(new LocalVector(indexes, _vectors[i])));
+            conditionsValue[i] = new SecondConditionValue(new LocalVector(indexes, _vectors[i]));
         }
 
-        return conditions.ToArray();
+        return conditionsValue;
     }
 
     private BaseVector GetRVector(int[] indexes, Bound bound, double h, double sigma, BaseVector vector)
@@ -133,10 +134,9 @@ public class SecondBoundaryProvider
         return vector;
     }
 
-    public SecondCondition[] GetConditions(int elementsByLength, int elementsByHeight)
+    public SecondConditionValue[] GetConditions(int elementsByLength, int elementsByHeight)
     {
-        var elementsIndexes = new List<int>(2 * elementsByLength + elementsByHeight);
-        var bounds = new List<Bound>(2 * elementsByLength + elementsByHeight);
+        var conditions = new SecondCondition[2 * elementsByLength + elementsByHeight];
         _vectors = new BaseVector[2 * elementsByLength + elementsByHeight];
 
         for (var i = 0; i < _vectors.Length; i++)
@@ -144,24 +144,22 @@ public class SecondBoundaryProvider
             _vectors[i] = new BaseVector(2);
         }
 
-        for (var i = 0; i < elementsByLength; i++)
+        var j = 0;
+        for (var i = 0; i < elementsByLength; i++, j++)
         {
-            elementsIndexes.Add(i);
-            bounds.Add(Bound.Lower);
+            conditions[j] = new SecondCondition(i, Bound.Lower);
         }
 
-        for (var i = 0; i < elementsByHeight; i++)
+        for (var i = 0; i < elementsByHeight; i++, j++)
         {
-            elementsIndexes.Add(i * elementsByLength);
-            bounds.Add(Bound.Left);
+            conditions[j] = new SecondCondition(i * elementsByLength, Bound.Left);
         }
 
-        for (var i = elementsByLength * (elementsByHeight - 1); i < elementsByLength * elementsByHeight; i++)
+        for (var i = elementsByLength * (elementsByHeight - 1); i < elementsByLength * elementsByHeight; i++, j++)
         {
-            elementsIndexes.Add(i);
-            bounds.Add(Bound.Upper);
+            conditions[j] = new SecondCondition(i, Bound.Upper);
         }
 
-        return GetConditions(elementsIndexes.ToArray(), bounds.ToArray());
+        return GetConditions(conditions);
     }
 }
