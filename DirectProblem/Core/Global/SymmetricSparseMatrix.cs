@@ -1,4 +1,6 @@
-﻿namespace DirectProblem.Core.Global;
+﻿using DirectProblem.Extensions;
+
+namespace DirectProblem.Core.Global;
 
 public class SymmetricSparseMatrix
 {
@@ -15,17 +17,36 @@ public class SymmetricSparseMatrix
     {
         get
         {
-            Array.IndexOf(ColumnsIndexes, columnIndex, RowsIndexes[rowIndex],
-                RowsIndexes[rowIndex + 1] - RowsIndexes[rowIndex]);
+            if (rowIndex < 0 || columnIndex < 0) throw new ArgumentOutOfRangeException(nameof(rowIndex));
 
-            return _values[columnIndex];
+            if (rowIndex == columnIndex)
+            {
+                return _diagonal[rowIndex];
+            }
+
+            if (columnIndex > rowIndex)
+                (rowIndex, columnIndex) = (columnIndex, rowIndex);
+
+            var index = this[rowIndex].FindIndex(columnIndex);
+            
+            return _values[index];
         }
         set
         {
-            Array.IndexOf(ColumnsIndexes, columnIndex, RowsIndexes[rowIndex],
-                RowsIndexes[rowIndex + 1] - RowsIndexes[rowIndex]);
+            if (rowIndex < 0 || columnIndex < 0) throw new ArgumentOutOfRangeException(nameof(rowIndex));
 
-            _values[columnIndex] = value;
+            if (rowIndex == columnIndex)
+            {
+                _diagonal[rowIndex] = value;
+                return;
+            }
+
+            if (columnIndex > rowIndex)
+                (rowIndex, columnIndex) = (columnIndex, rowIndex);
+
+            var index = this[rowIndex].FindIndex(columnIndex);
+
+            _values[index] = value;
         }
     }
 
