@@ -1,16 +1,16 @@
-﻿using Electrostatics.GridGenerator.Area.Core;
+﻿using DirectProblem.GridGenerator.Intervals.Core;
 
-namespace Electrostatics.GridGenerator.Area.Splitting;
+namespace DirectProblem.GridGenerator.Intervals.Splitting;
 
 public class AxisSplitParameter
 {
     public Interval[] Sections { get; }
-    public IntervalSplitter[] Splitters { get; }
+    public IIntervalSplitter[] Splitters { get; }
 
-    public IEnumerable<(Interval section, IntervalSplitter parameter)> SectionWithParameter =>
-        Sections.Select((section, index) => new ValueTuple<Interval, IntervalSplitter>(section, Splitters[index]));
+    public IEnumerable<(Interval section, IIntervalSplitter parameter)> SectionWithParameter =>
+        Sections.Select((section, index) => new ValueTuple<Interval, IIntervalSplitter>(section, Splitters[index]));
 
-    public AxisSplitParameter(double[] points, params IntervalSplitter[] splitters)
+    public AxisSplitParameter(double[] points, params IIntervalSplitter[] splitters)
     {
         if (points.Length - 1 != splitters.Length)
             throw new ArgumentException();

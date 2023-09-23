@@ -1,4 +1,4 @@
-﻿namespace Electrostatics.GridGenerator.Area.Core;
+﻿namespace DirectProblem.GridGenerator.Intervals.Core;
 
 public readonly record struct Interval(double Begin, double End)
 {

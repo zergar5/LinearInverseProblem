@@ -1,8 +1,8 @@
-﻿using Electrostatics.Core.Global;
-using Electrostatics.Core.Local;
-using Electrostatics.FEM.Assembling;
+﻿using DirectProblem.Core.Global;
+using DirectProblem.Core.Local;
+using DirectProblem.FEM.Assembling;
 
-namespace Electrostatics.TwoDimensional.Assembling;
+namespace DirectProblem.TwoDimensional.Assembling;
 
 public class Inserter : IInserter<SymmetricSparseMatrix>
 {
@@ -12,15 +12,16 @@ public class Inserter : IInserter<SymmetricSparseMatrix>
 
         for (var i = 0; i < nodesIndexes.Length; i++)
         {
+            var row = nodesIndexes[i];
+
             for (var j = 0; j < i; j++)
             {
-                var elementIndex = globalMatrix[nodesIndexes[i], nodesIndexes[j]];
+                var column = nodesIndexes[j];
 
-                if (elementIndex == -1) continue;
-                globalMatrix.Values[elementIndex] += localMatrix[i, j];
+                globalMatrix[row, column] += localMatrix[i, j];
             }
 
-            globalMatrix.Diagonal[nodesIndexes[i]] += localMatrix[i, i];
+            globalMatrix[row, row] += localMatrix[i, i];
         }
     }
 

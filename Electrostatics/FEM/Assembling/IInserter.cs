@@ -1,7 +1,7 @@
-﻿using Electrostatics.Core.Global;
-using Electrostatics.Core.Local;
+﻿using DirectProblem.Core.Global;
+using DirectProblem.Core.Local;
 
-namespace Electrostatics.FEM.Assembling;
+namespace DirectProblem.FEM.Assembling;
 
 public interface IInserter<in TMatrix>
 {

@@ -1,5 +1,5 @@
-﻿using Electrostatics.Core.GridComponents;
-using Electrostatics.TwoDimensional.Assembling.Local;
+﻿using DirectProblem.Core.GridComponents;
+using DirectProblem.TwoDimensional.Assembling.Local;
 
 namespace Electrostatics.Calculus;
 

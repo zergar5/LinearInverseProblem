@@ -1,20 +1,20 @@
-﻿using Electrostatics.Calculus;
-using Electrostatics.Core.Global;
-using Electrostatics.Core.GridComponents;
-using Electrostatics.FEM;
-using Electrostatics.GridGenerator;
-using Electrostatics.GridGenerator.Area.Splitting;
-using Electrostatics.SLAE.Preconditions.LLT;
-using Electrostatics.SLAE.Solvers;
+﻿using DirectProblem.Core.GridComponents;
+using DirectProblem.FEM;
+using DirectProblem.GridGenerator;
+using DirectProblem.GridGenerator.Intervals.Splitting;
+using DirectProblem.SLAE.Preconditions.LLT;
+using DirectProblem.SLAE.Solvers;
+using DirectProblem.TwoDimensional.Assembling;
+using DirectProblem.TwoDimensional.Assembling.Boundary;
+using DirectProblem.TwoDimensional.Assembling.Global;
+using DirectProblem.TwoDimensional.Assembling.Local;
+using DirectProblem.TwoDimensional.Parameters;
+using Electrostatics.Calculus;
 using Electrostatics.TwoDimensional;
-using Electrostatics.TwoDimensional.Assembling;
 using Electrostatics.TwoDimensional.Assembling.Boundary;
 using Electrostatics.TwoDimensional.Assembling.Global;
 using Electrostatics.TwoDimensional.Assembling.Local;
-using Electrostatics.TwoDimensional.Parameters;
 using System.Globalization;
-using Electrostatics.TwoDimensional.Assembling.MatrixTemplates;
-using static System.Math;
 
 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -35,7 +35,7 @@ var grid = gridBuilder2D
             new ProportionalSplitter(4, 1.3)
         )
     )
-    .SetMaterials(new []
+    .SetMaterials(new[]
     {
         0, 0, 1, 2, 2, 2, 2, 2, 2, 2, //0
         0, 0, 1, 2, 2, 2, 2, 2, 2, 2,

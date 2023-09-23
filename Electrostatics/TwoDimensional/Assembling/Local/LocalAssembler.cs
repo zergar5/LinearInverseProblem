@@ -1,42 +1,33 @@
-﻿using Electrostatics.Calculus;
-using Electrostatics.Core;
-using Electrostatics.Core.Base;
-using Electrostatics.Core.GridComponents;
-using Electrostatics.Core.Local;
-using Electrostatics.FEM.Assembling.Local;
-using Electrostatics.FEM.Parameters;
-using Electrostatics.GridGenerator.Area.Core;
-using Electrostatics.TwoDimensional.Parameters;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.Base;
+using DirectProblem.Core.GridComponents;
+using DirectProblem.Core.Local;
+using DirectProblem.FEM.Assembling.Local;
+using DirectProblem.FEM.Parameters;
+using DirectProblem.TwoDimensional.Parameters;
 
 namespace Electrostatics.TwoDimensional.Assembling.Local;
 
 public class LocalAssembler : ILocalAssembler
 {
     private readonly Grid<Node2D> _grid;
-    private readonly LocalBasisFunctionsProvider _localBasisFunctionsProvider;
+    private readonly ILocalMatrixAssembler _localMatrixAssembler;
     private readonly MaterialFactory _materialFactory;
-    //private readonly IFunctionalParameter _functionalParameter;
-    private readonly DoubleIntegralCalculator _doubleIntegralCalculator;
-    private readonly DerivativeCalculator _derivativeCalculator;
-    private readonly BaseMatrix _stiffnessMatrix = new(4);
+    private readonly IFunctionalParameter _functionalParameter;
     private readonly BaseVector _rightPart = new(4);
 
     public LocalAssembler
     (
         Grid<Node2D> grid,
-        LocalBasisFunctionsProvider localBasisFunctionsProvider,
+        ILocalMatrixAssembler localMatrixAssembler,
         MaterialFactory materialFactory,
-        //IFunctionalParameter functionalParameter,
-        DoubleIntegralCalculator doubleIntegralCalculator,
-        DerivativeCalculator derivativeCalculator
+        IFunctionalParameter functionalParameter
     )
     {
         _grid = grid;
-        _localBasisFunctionsProvider = localBasisFunctionsProvider;
+        _localMatrixAssembler = localMatrixAssembler;
         _materialFactory = materialFactory;
-        //_functionalParameter = functionalParameter;
-        _doubleIntegralCalculator = doubleIntegralCalculator;
-        _derivativeCalculator = derivativeCalculator;
+        _functionalParameter = functionalParameter;
     }
 
     public LocalMatrix AssembleMatrix(Element element)
@@ -56,36 +47,9 @@ public class LocalAssembler : ILocalAssembler
 
     private BaseMatrix GetStiffnessMatrix(Element element)
     {
-        var rInterval = new Interval(_grid.Nodes[element.NodesIndexes[0]].R, _grid.Nodes[element.NodesIndexes[1]].R);
-        var zInterval = new Interval(_grid.Nodes[element.NodesIndexes[0]].Z, _grid.Nodes[element.NodesIndexes[2]].Z);
+        var stiffness = _localMatrixAssembler.AssembleStiffnessMatrix(element);
 
-        var localBasisFunctions = _localBasisFunctionsProvider.GetBilinearFunctions(element);
-
-        for (var i = 0; i < element.NodesIndexes.Length; i++)
-        {
-            for (var j = 0; j <= i; j++)
-            {
-                _stiffnessMatrix[i, j] = _doubleIntegralCalculator.Calculate
-                (
-                    rInterval,
-                    zInterval,
-                    (r, z) =>
-                    {
-                        var node = new Node2D(r, z);
-                        return
-                            (_derivativeCalculator.Calculate(localBasisFunctions[i], node, 'r') *
-                             _derivativeCalculator.Calculate(localBasisFunctions[j], node, 'r') +
-                             _derivativeCalculator.Calculate(localBasisFunctions[i], node, 'z') *
-                             _derivativeCalculator.Calculate(localBasisFunctions[j], node, 'z')) *
-                            r;
-                    }
-                );
-
-                _stiffnessMatrix[j, i] = _stiffnessMatrix[i, j];
-            }
-        }
-
-        return _stiffnessMatrix;
+        return stiffness;
     }
 
     private BaseVector GetRightPart(Element element)

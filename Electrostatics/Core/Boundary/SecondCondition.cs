@@ -1,5 +1,6 @@
-﻿using Electrostatics.Core.Local;
+﻿using DirectProblem.Core.Local;
 
-namespace Electrostatics.Core.Boundary;
+namespace DirectProblem.Core.Boundary;
 
-public record struct SecondCondition(LocalVector Vector);
+public record struct SecondCondition(int ElementIndex, Bound Bound);
+public record struct SecondConditionValue(LocalVector Vector);

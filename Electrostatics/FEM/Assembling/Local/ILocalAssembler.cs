@@ -1,7 +1,7 @@
-﻿using Electrostatics.Core.GridComponents;
-using Electrostatics.Core.Local;
+﻿using DirectProblem.Core.GridComponents;
+using DirectProblem.Core.Local;
 
-namespace Electrostatics.FEM.Assembling.Local;
+namespace DirectProblem.FEM.Assembling.Local;
 
 public interface ILocalAssembler
 {

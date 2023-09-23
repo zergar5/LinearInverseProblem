@@ -1,14 +1,16 @@
-﻿using Electrostatics.Core;
-using Electrostatics.Core.GridComponents;
-using Electrostatics.GridGenerator.Area.Splitting;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.GridComponents;
+using DirectProblem.GridGenerator.Intervals.Splitting;
 
-namespace Electrostatics.GridGenerator;
+namespace DirectProblem.GridGenerator;
 
 public class GridBuilder2D : IGridBuilder<Node2D>
 {
-    private AxisSplitParameter? _rAxisSplitParameter;
-    private AxisSplitParameter? _zAxisSplitParameter;
+    private AxisSplitParameter _rAxisSplitParameter;
+    private AxisSplitParameter _zAxisSplitParameter;
     private int[]? _materialsId;
+    private Source[]? _sources;
+    private Area[]? _areas;
 
     private int GetTotalRElements => _rAxisSplitParameter.Splitters.Sum(r => r.Steps);
     private int GetTotalZElements => _zAxisSplitParameter.Splitters.Sum(z => z.Steps);
@@ -31,6 +33,18 @@ public class GridBuilder2D : IGridBuilder<Node2D>
         return this;
     }
 
+    public GridBuilder2D SetSources(Source[] sources)
+    {
+        _sources = sources;
+        return this;
+    }
+
+    public GridBuilder2D SetAreas(Area[] areas)
+    {
+        _areas = areas;
+        return this;
+    }
+
     public Grid<Node2D> Build()
     {
         if (_rAxisSplitParameter == null || _zAxisSplitParameter == null)
@@ -43,8 +57,6 @@ public class GridBuilder2D : IGridBuilder<Node2D>
 
         var nodes = new Node2D[totalNodes];
         var elements = new Element[totalElements];
-
-        _materialsId ??= new int[totalElements];
 
         var i = 0;
 
@@ -72,12 +84,13 @@ public class GridBuilder2D : IGridBuilder<Node2D>
                         {
                             var elementIndex = j - 1 + (i - 1) * totalRElements;
                             var nodesIndexes = GetCurrentElementIndexes(i - 1, j - 1);
+                            var materialId = GetElementMaterial(elementIndex, nodes[nodesIndexes[0]], nodes[nodesIndexes[^1]]);
 
                             elements[elementIndex] = new Element(
                                 nodesIndexes,
                                 nodes[nodesIndexes[1]].R - nodes[nodesIndexes[0]].R,
                                 nodes[nodesIndexes[2]].Z - nodes[nodesIndexes[0]].Z,
-                                _materialsId[elementIndex]
+                                materialId
                                 );
                         }
 
@@ -89,7 +102,7 @@ public class GridBuilder2D : IGridBuilder<Node2D>
             }
         }
 
-        return new Grid<Node2D>(nodes, elements);
+        return new Grid<Node2D>(nodes, elements, _areas, _sources);
     }
 
     private int GetTotalNodes()
@@ -115,5 +128,21 @@ public class GridBuilder2D : IGridBuilder<Node2D>
         };
 
         return indexes;
+    }
+
+    private int GetElementMaterial(int elementIndex, Node2D lowerLeftCornerNode, Node2D upperRightCornerNode)
+    {
+        if (_areas != null)
+        {
+            var materialId = _areas.First(a => a
+                    .AreaHas(lowerLeftCornerNode, upperRightCornerNode))
+                .MaterialId;
+            return materialId;
+        }
+        if (_materialsId != null)
+        {
+            return _materialsId[elementIndex];
+        }
+        return 0;
     }
 }

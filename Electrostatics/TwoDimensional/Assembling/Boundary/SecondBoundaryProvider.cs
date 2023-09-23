@@ -1,11 +1,11 @@
-﻿using Electrostatics.Calculus;
-using Electrostatics.Core;
-using Electrostatics.Core.Base;
-using Electrostatics.Core.Boundary;
-using Electrostatics.Core.GridComponents;
-using Electrostatics.Core.Local;
-using Electrostatics.FEM.Assembling;
-using Electrostatics.TwoDimensional.Parameters;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.Base;
+using DirectProblem.Core.Boundary;
+using DirectProblem.Core.GridComponents;
+using DirectProblem.Core.Local;
+using DirectProblem.FEM.Assembling;
+using DirectProblem.TwoDimensional.Parameters;
+using Electrostatics.Calculus;
 
 namespace Electrostatics.TwoDimensional.Assembling.Boundary;
 

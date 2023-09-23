@@ -1,4 +1,4 @@
-﻿namespace CourseProject.SLAE;
+﻿namespace DirectProblem.SLAE;
 
 public class MethodsConfig
 {

@@ -1,9 +1,8 @@
-﻿using CourseProject.SLAE;
-using Electrostatics.Core.Global;
-using Electrostatics.FEM;
-using Electrostatics.SLAE.Preconditions.LLT;
+﻿using DirectProblem.Core.Global;
+using DirectProblem.FEM;
+using DirectProblem.SLAE.Preconditions.LLT;
 
-namespace Electrostatics.SLAE.Solvers;
+namespace DirectProblem.SLAE.Solvers;
 
 public class MCG
 {
@@ -23,7 +22,8 @@ public class MCG
     {
         _preconditionMatrix = _lltPreconditioner.Decompose(_preconditionMatrix);
 
-        _r = GlobalVector.Subtract(equation.RightSide, SymmetricSparseMatrix.Multiply(equation.Matrix, equation.Solution, _r), _r);
+        _r = GlobalVector.Subtract(equation.RightSide,
+            SymmetricSparseMatrix.Multiply(equation.Matrix, equation.Solution, _r), _r);
         _z = _lltSparse.Solve(_preconditionMatrix, _r);
     }
 
@@ -46,22 +46,25 @@ public class MCG
 
         for (var i = 1; i <= MethodsConfig.MaxIterations && residual > Math.Pow(MethodsConfig.Eps, 2); i++)
         {
-            rzBufferVector = _r.Clone(rzBufferVector);
-            var scalarMrR = GlobalVector.ScalarProduct(_lltSparse.Solve(_preconditionMatrix, _r, rzBufferVector), _r);
+            rzBufferVector = _r.Copy(rzBufferVector);
+            var scalarMrR = GlobalVector.ScalarProduct(_lltSparse.Solve(_preconditionMatrix, _r, rzBufferVector),
+                _r);
 
             var AxZ = SymmetricSparseMatrix.Multiply(equation.Matrix, _z, xBufferVector);
 
             var alphaK = scalarMrR / GlobalVector.ScalarProduct(AxZ, _z);
 
-            GlobalVector.Sum(x, GlobalVector.Multiply(alphaK, _z, rzBufferVector), x);
+            GlobalVector.Sum(x, GlobalVector.Multiply(alphaK, _z, rzBufferVector),
+                x);
 
-            var rNext = GlobalVector.Subtract(_r, GlobalVector.Multiply(alphaK, AxZ, AxZ), _r);
+            var rNext = GlobalVector.Subtract(_r,
+                GlobalVector.Multiply(alphaK, AxZ, AxZ), _r);
 
-            xBufferVector = rNext.Clone(xBufferVector);
-            var betaK = GlobalVector.ScalarProduct(_lltSparse.Solve(_preconditionMatrix, rNext, xBufferVector), rNext) /
-                        scalarMrR;
+            xBufferVector = rNext.Copy(xBufferVector);
+            var betaK = GlobalVector.ScalarProduct(_lltSparse.Solve(_preconditionMatrix, rNext, xBufferVector),
+                            rNext) / scalarMrR;
 
-            xBufferVector = rNext.Clone(xBufferVector);
+            xBufferVector = rNext.Copy(xBufferVector);
             var zNext = GlobalVector.Sum(_lltSparse.Solve(_preconditionMatrix, rNext, xBufferVector),
                 GlobalVector.Multiply(betaK, _z, _z), _z);
 

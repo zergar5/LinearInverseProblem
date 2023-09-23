@@ -1,6 +1,7 @@
-﻿using Electrostatics.Core.Global;
+﻿using DirectProblem.Core.Global;
+using DirectProblem.Extensions;
 
-namespace Electrostatics.SLAE.Preconditions.LLT;
+namespace DirectProblem.SLAE.Preconditions.LLT;
 
 public class LLTPreconditioner : IPreconditioner<SymmetricSparseMatrix>
 {
@@ -8,9 +9,10 @@ public class LLTPreconditioner : IPreconditioner<SymmetricSparseMatrix>
     {
         var preconditionMatrix = globalMatrix;
 
-        for (var i = 0; i < preconditionMatrix.CountRows; i++)
+        for (var i = 0; i < preconditionMatrix.Count; i++)
         {
             var sumD = 0.0;
+
             for (var j = preconditionMatrix.RowsIndexes[i]; j < preconditionMatrix.RowsIndexes[i + 1]; j++)
             {
                 var sum = 0d;
@@ -18,19 +20,22 @@ public class LLTPreconditioner : IPreconditioner<SymmetricSparseMatrix>
                 for (var k = preconditionMatrix.RowsIndexes[i]; k < j; k++)
                 {
                     var iPrev = i - preconditionMatrix.ColumnsIndexes[j];
-                    var kPrev = preconditionMatrix[i - iPrev, preconditionMatrix.ColumnsIndexes[k]];
+                    var kPrev = preconditionMatrix[i - iPrev].FindIndex(preconditionMatrix.ColumnsIndexes[k]);
 
                     if (kPrev == -1) continue;
 
-                    sum += preconditionMatrix.Values[k] * preconditionMatrix.Values[kPrev];
+                    sum += preconditionMatrix[iPrev, preconditionMatrix.ColumnsIndexes[k]] *
+                           preconditionMatrix[iPrev, preconditionMatrix.ColumnsIndexes[kPrev]];
                 }
 
-                preconditionMatrix.Values[j] = (preconditionMatrix.Values[j] - sum) / preconditionMatrix.Diagonal[preconditionMatrix.ColumnsIndexes[j]];
+                preconditionMatrix[i, j] = (preconditionMatrix[i, j] - sum) /
+                                           preconditionMatrix[preconditionMatrix.ColumnsIndexes[j],
+                                               preconditionMatrix.ColumnsIndexes[j]];
 
-                sumD += Math.Pow(preconditionMatrix.Values[j], 2);
+                sumD += Math.Pow(preconditionMatrix[i, j], 2);
             }
 
-            preconditionMatrix.Diagonal[i] = Math.Sqrt(preconditionMatrix.Diagonal[i] - sumD);
+            preconditionMatrix[i, i] = Math.Sqrt(preconditionMatrix[i, i] - sumD);
         }
 
         return preconditionMatrix;

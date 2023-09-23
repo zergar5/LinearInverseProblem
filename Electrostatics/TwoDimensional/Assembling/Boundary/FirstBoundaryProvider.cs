@@ -1,23 +1,23 @@
-﻿using Electrostatics.Core;
-using Electrostatics.Core.Boundary;
-using Electrostatics.Core.GridComponents;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.Boundary;
+using DirectProblem.Core.GridComponents;
 
-namespace Electrostatics.TwoDimensional.Assembling.Boundary;
+namespace DirectProblem.TwoDimensional.Assembling.Boundary;
 
 public class FirstBoundaryProvider
 {
     private readonly Grid<Node2D> _grid;
-    //private readonly Func<Node2D, double> _u;
+    private readonly Func<Node2D, double> _u;
 
-    public FirstBoundaryProvider(Grid<Node2D> grid /*Func<Node2D, double> u*/)
+    public FirstBoundaryProvider(Grid<Node2D> grid, Func<Node2D, double> u)
     {
         _grid = grid;
-        //_u = u;
+        _u = u;
     }
 
-    public FirstCondition[] GetConditions(int[] elementsIndexes, Bound[] bounds)
+    public FirstConditionValue[] GetConditions(int[] elementsIndexes, Bound[] bounds)
     {
-        var conditions = new List<FirstCondition>(elementsIndexes.Length);
+        var conditions = new List<FirstConditionValue>(elementsIndexes.Length);
 
         for (var i = 0; i < elementsIndexes.Length; i++)
         {
@@ -28,8 +28,9 @@ public class FirstBoundaryProvider
             for (var j = 0; j < indexes.Length; j++)
             {
                 values[j] = Calculate(indexes[j]);
-                conditions.Add(new FirstCondition(indexes[j], values[j]));
             }
+
+            conditions.Add(new FirstConditionValue(indexes, values));
         }
 
         return conditions.ToArray();
@@ -51,6 +52,6 @@ public class FirstBoundaryProvider
 
     private double Calculate(int index)
     {
-        return 0;
+        return _u(_grid.Nodes[index]);
     }
 }

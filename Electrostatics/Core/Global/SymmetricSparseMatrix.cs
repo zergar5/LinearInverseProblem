@@ -1,22 +1,38 @@
-﻿namespace Electrostatics.Core.Global;
+﻿namespace DirectProblem.Core.Global;
 
 public class SymmetricSparseMatrix
 {
-    public double[] Diagonal { get; set; }
-    public double[] Values { get; set; }
+    private readonly double[] _diagonal;
+    private readonly double[] _values;
     public int[] RowsIndexes { get; }
     public int[] ColumnsIndexes { get; }
 
-    public int CountRows => Diagonal.Length;
-    public int CountColumns => Diagonal.Length;
-    public int this[int rowIndex, int columnIndex] =>
-        Array.IndexOf(ColumnsIndexes, columnIndex, RowsIndexes[rowIndex],
-            RowsIndexes[rowIndex + 1] - RowsIndexes[rowIndex]);
+    public int Count => _diagonal.Length;
+
+    public int[] this[int rowIndex] => ColumnsIndexes[RowsIndexes[rowIndex]..RowsIndexes[rowIndex + 1]];
+
+    public double this[int rowIndex, int columnIndex]
+    {
+        get
+        {
+            Array.IndexOf(ColumnsIndexes, columnIndex, RowsIndexes[rowIndex],
+                RowsIndexes[rowIndex + 1] - RowsIndexes[rowIndex]);
+
+            return _values[columnIndex];
+        }
+        set
+        {
+            Array.IndexOf(ColumnsIndexes, columnIndex, RowsIndexes[rowIndex],
+                RowsIndexes[rowIndex + 1] - RowsIndexes[rowIndex]);
+
+            _values[columnIndex] = value;
+        }
+    }
 
     public SymmetricSparseMatrix(int[] rowsIndexes, int[] columnsIndexes)
     {
-        Diagonal = new double[rowsIndexes.Length - 1];
-        Values = new double[rowsIndexes[^1]];
+        _diagonal = new double[rowsIndexes.Length - 1];
+        _values = new double[rowsIndexes[^1]];
         RowsIndexes = rowsIndexes;
         ColumnsIndexes = columnsIndexes;
     }
@@ -31,27 +47,28 @@ public class SymmetricSparseMatrix
     {
         RowsIndexes = rowsIndexes;
         ColumnsIndexes = columnsIndexes;
-        Diagonal = diagonal;
-        Values = values;
+        _diagonal = diagonal;
+        _values = values;
     }
 
     public static GlobalVector Multiply(SymmetricSparseMatrix matrix, GlobalVector vector, GlobalVector? result = null)
     {
-        result ??= new GlobalVector(matrix.CountRows);
+        if (matrix.Count != vector.Count)
+            throw new ArgumentOutOfRangeException(
+                $"{nameof(matrix)} and {nameof(vector)} must have same size");
+
+        result ??= new GlobalVector(matrix.Count);
 
         var rowsIndexes = matrix.RowsIndexes;
-        var columnsIndexes = matrix.ColumnsIndexes;
-        var di = matrix.Diagonal;
-        var values = matrix.Values;
 
-        for (var i = 0; i < matrix.CountRows; i++)
+        for (var i = 0; i < matrix.Count; i++)
         {
-            result[i] += di[i] * vector[i];
+            result[i] += matrix[i, i] * vector[i];
 
             for (var j = rowsIndexes[i]; j < rowsIndexes[i + 1]; j++)
             {
-                result[i] += values[j] * vector[columnsIndexes[j]];
-                result[columnsIndexes[j]] += values[j] * vector[i];
+                result[i] += matrix[i, j] * vector[j];
+                result[j] += matrix[i, j] * vector[i];
             }
         }
 
@@ -62,21 +79,21 @@ public class SymmetricSparseMatrix
     {
         var rowIndexes = new int[RowsIndexes.Length];
         var columnIndexes = new int[ColumnsIndexes.Length];
-        var diagonal = new double[Diagonal.Length];
-        var values = new double[Values.Length];
+        var diagonal = new double[_diagonal.Length];
+        var values = new double[_values.Length];
 
         Array.Copy(RowsIndexes, rowIndexes, RowsIndexes.Length);
         Array.Copy(ColumnsIndexes, columnIndexes, ColumnsIndexes.Length);
-        Array.Copy(Diagonal, diagonal, Diagonal.Length);
-        Array.Copy(Values, values, Values.Length);
+        Array.Copy(_diagonal, diagonal, _diagonal.Length);
+        Array.Copy(_values, values, _values.Length);
 
         return new SymmetricSparseMatrix(rowIndexes, columnIndexes, diagonal, values);
     }
 
-    public SymmetricSparseMatrix Clone(SymmetricSparseMatrix sparseMatrix)
+    public SymmetricSparseMatrix Copy(SymmetricSparseMatrix sparseMatrix)
     {
-        Array.Copy(Diagonal, sparseMatrix.Diagonal, Diagonal.Length);
-        Array.Copy(Values, sparseMatrix.Values, Values.Length);
+        Array.Copy(_diagonal, sparseMatrix._diagonal, _diagonal.Length);
+        Array.Copy(_values, sparseMatrix._values, _values.Length);
 
         return sparseMatrix;
     }

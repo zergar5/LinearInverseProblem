@@ -1,4 +1,6 @@
-﻿namespace Electrostatics.Core.GridComponents;
+﻿using DirectProblem.Core.Boundary;
+
+namespace DirectProblem.Core.GridComponents;
 
 public class Element
 {

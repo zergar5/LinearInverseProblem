@@ -1,6 +1,6 @@
-﻿using Electrostatics.Core.Base;
+﻿using DirectProblem.Core.Base;
 
-namespace Electrostatics.Core.Local;
+namespace DirectProblem.Core.Local;
 
 public class LocalVector
 {

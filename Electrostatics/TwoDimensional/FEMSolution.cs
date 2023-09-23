@@ -1,9 +1,8 @@
-﻿using Electrostatics.Core;
-using Electrostatics.Core.Global;
-using Electrostatics.Core.GridComponents;
-using Electrostatics.FEM;
-using Electrostatics.TwoDimensional.Assembling.Local;
-using System.Drawing;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.Global;
+using DirectProblem.Core.GridComponents;
+using DirectProblem.FEM;
+using DirectProblem.TwoDimensional.Assembling.Local;
 
 namespace Electrostatics.TwoDimensional;
 

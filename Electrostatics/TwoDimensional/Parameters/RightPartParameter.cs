@@ -1,8 +1,8 @@
-﻿using Electrostatics.Core;
-using Electrostatics.Core.GridComponents;
-using Electrostatics.FEM.Parameters;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.GridComponents;
+using DirectProblem.FEM.Parameters;
 
-namespace Electrostatics.TwoDimensional.Parameters;
+namespace DirectProblem.TwoDimensional.Parameters;
 
 public class RightPartParameter : IFunctionalParameter
 {

@@ -1,6 +1,6 @@
-﻿using Electrostatics.Core.GridComponents;
+﻿using DirectProblem.Core.GridComponents;
 
-namespace Electrostatics.FEM;
+namespace DirectProblem.FEM;
 
 public class CourseHolder
 {

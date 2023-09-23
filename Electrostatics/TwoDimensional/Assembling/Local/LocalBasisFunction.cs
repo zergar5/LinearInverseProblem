@@ -1,6 +1,6 @@
-﻿using Electrostatics.Core.GridComponents;
+﻿using DirectProblem.Core.GridComponents;
 
-namespace Electrostatics.TwoDimensional.Assembling.Local;
+namespace DirectProblem.TwoDimensional.Assembling.Local;
 
 public class LocalBasisFunction
 {

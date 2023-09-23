@@ -1,17 +1,9 @@
-﻿using Electrostatics.Core.Global;
-using Electrostatics.SLAE.Preconditions.LLT;
+﻿using DirectProblem.Core.Global;
 
-namespace Electrostatics.SLAE.Solvers;
+namespace DirectProblem.SLAE.Solvers;
 
 public class LLTSparse
 {
-    private readonly LLTPreconditioner _lltPreconditioner;
-
-    public LLTSparse(LLTPreconditioner lltPreconditioner)
-    {
-        _lltPreconditioner = lltPreconditioner;
-    }
-
     public GlobalVector Solve(SymmetricSparseMatrix matrix, GlobalVector vector, GlobalVector? result = null)
     {
         var y = CalcY(matrix, vector, result);
@@ -24,14 +16,14 @@ public class LLTSparse
     {
         y ??= b.Clone();
 
-        for (var i = 0; i < sparseMatrix.CountRows; i++)
+        for (var i = 0; i < sparseMatrix.Count; i++)
         {
             var sum = 0.0;
-            for (var j = sparseMatrix.RowsIndexes[i]; j < sparseMatrix.RowsIndexes[i + 1]; j++)
+            foreach (var j in sparseMatrix[i])
             {
-                sum += sparseMatrix.Values[j] * y[sparseMatrix.ColumnsIndexes[j]];
+                sum += sparseMatrix[i, j] * y[j];
             }
-            y[i] = (b[i] - sum) / sparseMatrix.Diagonal[i];
+            y[i] = (b[i] - sum) / sparseMatrix[i, i];
         }
 
         return y;
@@ -41,12 +33,12 @@ public class LLTSparse
     {
         x ??= y.Clone();
 
-        for (var i = sparseMatrix.CountRows - 1; i >= 0; i--)
+        for (var i = sparseMatrix.Count - 1; i >= 0; i--)
         {
-            x[i] /= sparseMatrix.Diagonal[i];
-            for (var j = sparseMatrix.RowsIndexes[i + 1] - 1; j >= sparseMatrix.RowsIndexes[i]; j--)
+            x[i] /= sparseMatrix[i, i];
+            foreach (var j in sparseMatrix[i].Reverse())
             {
-                x[sparseMatrix.ColumnsIndexes[j]] -= sparseMatrix.Values[j] * x[i];
+                x[j] -= sparseMatrix[i, j] * x[i];
             }
         }
 

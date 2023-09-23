@@ -1,14 +1,13 @@
-﻿using Electrostatics.Core;
-using Electrostatics.Core.Boundary;
-using Electrostatics.Core.Global;
-using Electrostatics.Core.GridComponents;
-using Electrostatics.FEM.Assembling;
-using Electrostatics.FEM.Assembling.Global;
-using Electrostatics.FEM.Assembling.Local;
-using System;
-using Electrostatics.Core.Base;
-using Electrostatics.Core.Local;
-using Electrostatics.TwoDimensional.Assembling.Local;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.Base;
+using DirectProblem.Core.Boundary;
+using DirectProblem.Core.Global;
+using DirectProblem.Core.GridComponents;
+using DirectProblem.Core.Local;
+using DirectProblem.FEM.Assembling;
+using DirectProblem.FEM.Assembling.Global;
+using DirectProblem.FEM.Assembling.Local;
+using DirectProblem.TwoDimensional.Assembling.Local;
 
 namespace Electrostatics.TwoDimensional.Assembling.Global;
 
@@ -64,7 +63,7 @@ public class GlobalAssembler<TNode>
         return this;
     }
 
-    public GlobalAssembler<TNode> ApplySecondConditions(SecondCondition[] conditions)
+    public GlobalAssembler<TNode> ApplySecondConditions(SecondConditionValue[] conditions)
     {
         foreach (var condition in conditions)
         {
@@ -74,23 +73,27 @@ public class GlobalAssembler<TNode>
         return this;
     }
 
-    public GlobalAssembler<TNode> SetSource(Node2D sourcePoint, double power)
+    public GlobalAssembler<TNode> SetSources(Source[] sources)
     {
-        var element = _grid.Elements.First(x => ElementHas(x, sourcePoint));
-
-        var basisFunctions = _localBasisFunctionsProvider.GetBilinearFunctions(element);
-
-        for (var i = 0; i < element.NodesIndexes.Length; i++)
+        foreach (var source in sources)
         {
-            _bufferVector[i] = power * basisFunctions[i].Calculate(sourcePoint);
+            var element = _grid.Elements.First(x => ElementHas(x, source.Point));
+
+            var basisFunctions = _localBasisFunctionsProvider.GetBilinearFunctions(element);
+
+            for (var i = 0; i < element.NodesIndexes.Length; i++)
+            {
+                _bufferVector[i] = source.Power * basisFunctions[i].Calculate(source.Point);
+            }
+
+            _inserter.InsertVector(_equation.RightSide, new LocalVector(element.NodesIndexes, _bufferVector));
         }
 
-        _inserter.InsertVector(_equation.RightSide, new LocalVector(element.NodesIndexes, _bufferVector));
 
         return this;
     }
 
-    public GlobalAssembler<TNode> ApplyFirstConditions(FirstCondition[] conditions)
+    public GlobalAssembler<TNode> ApplyFirstConditions(FirstConditionValue[] conditions)
     {
         foreach (var condition in conditions)
         {
@@ -107,7 +110,7 @@ public class GlobalAssembler<TNode>
 
     public SymmetricSparseMatrix BuildPreconditionMatrix()
     {
-        _preconditionMatrix = _equation.Matrix.Clone(_preconditionMatrix);
+        _preconditionMatrix = _equation.Matrix.Copy(_preconditionMatrix);
         return _preconditionMatrix;
     }
 

@@ -1,8 +1,8 @@
-﻿using Electrostatics.GridGenerator.Area.Core;
+﻿using DirectProblem.GridGenerator.Intervals.Core;
 
-namespace Electrostatics.GridGenerator.Area.Splitting;
+namespace DirectProblem.GridGenerator.Intervals.Splitting;
 
-public class ProportionalSplitter : IntervalSplitter
+public class ProportionalSplitter : IIntervalSplitter
 {
     public int Steps { get; }
     public double DischargeRatio { get; }

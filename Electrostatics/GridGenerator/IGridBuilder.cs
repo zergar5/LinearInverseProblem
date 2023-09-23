@@ -1,6 +1,6 @@
-﻿using Electrostatics.Core;
+﻿using DirectProblem.Core;
 
-namespace Electrostatics.GridGenerator;
+namespace DirectProblem.GridGenerator;
 
 public interface IGridBuilder<TPoint>
 {

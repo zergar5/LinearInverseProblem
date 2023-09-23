@@ -1,13 +1,14 @@
-﻿using Electrostatics.Core;
-using Electrostatics.Core.GridComponents;
-using Electrostatics.FEM;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.GridComponents;
+using DirectProblem.FEM;
 
-namespace Electrostatics.TwoDimensional.Assembling.Local;
+namespace DirectProblem.TwoDimensional.Assembling.Local;
 
 public class LocalBasisFunctionsProvider
 {
     private readonly Grid<Node2D> _grid;
     private readonly LinearFunctionsProvider _linearFunctionsProvider;
+    private readonly LocalBasisFunction[] _localBasisFunctions = new LocalBasisFunction[4];
 
     public LocalBasisFunctionsProvider(Grid<Node2D> grid, LinearFunctionsProvider linearFunctionsProvider)
     {
@@ -26,14 +27,11 @@ public class LocalBasisFunctionsProvider
         var secondYFunction =
             _linearFunctionsProvider.CreateSecondFunction(_grid.Nodes[element.NodesIndexes[0]].Z, element.Height);
 
-        var basisFunctions = new LocalBasisFunction[]
-        {
-            new (firstXFunction, firstYFunction),
-            new (secondXFunction, firstYFunction),
-            new (firstXFunction, secondYFunction),
-            new (secondXFunction, secondYFunction)
-        };
+        _localBasisFunctions[0] = new LocalBasisFunction(firstXFunction, firstYFunction);
+        _localBasisFunctions[1] = new LocalBasisFunction(secondXFunction, firstYFunction);
+        _localBasisFunctions[2] = new LocalBasisFunction(firstXFunction, secondYFunction);
+        _localBasisFunctions[3] = new LocalBasisFunction(secondXFunction, secondYFunction);
 
-        return basisFunctions;
+        return _localBasisFunctions;
     }
 }

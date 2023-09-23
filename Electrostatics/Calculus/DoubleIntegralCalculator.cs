@@ -1,4 +1,4 @@
-﻿using Electrostatics.GridGenerator.Area.Core;
+﻿using DirectProblem.GridGenerator.Intervals.Core;
 
 namespace Electrostatics.Calculus;
 

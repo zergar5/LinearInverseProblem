@@ -1,23 +1,22 @@
-﻿using Electrostatics.Core;
-using Electrostatics.Core.Global;
-using Electrostatics.Core.GridComponents;
-using Electrostatics.FEM.Assembling;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.Global;
+using DirectProblem.Core.GridComponents;
+using DirectProblem.FEM.Assembling;
 
-namespace Electrostatics.TwoDimensional.Assembling;
+namespace DirectProblem.TwoDimensional.Assembling;
 
 public class MatrixPortraitBuilder : IMatrixPortraitBuilder<SymmetricSparseMatrix>
 {
-    private List<SortedSet<int>> _adjacencyList = null!;
+    private List<SortedSet<int>> _adjacencyList;
 
     public SymmetricSparseMatrix Build(Grid<Node2D> grid)
     {
         BuildAdjacencyList(grid);
 
         var amount = 0;
-        var buf = _adjacencyList.Select(nodeSet => amount += nodeSet.Count).ToList();
-        buf.Insert(0, 0);
+        var rowsIndexes = new[] { 0 };
+        rowsIndexes = rowsIndexes.Concat(_adjacencyList.Select(nodeSet => amount += nodeSet.Count)).ToArray();
 
-        var rowsIndexes = buf.ToArray();
         var columnsIndexes = _adjacencyList.SelectMany(nodeList => nodeList).ToArray();
 
         return new SymmetricSparseMatrix(rowsIndexes, columnsIndexes);

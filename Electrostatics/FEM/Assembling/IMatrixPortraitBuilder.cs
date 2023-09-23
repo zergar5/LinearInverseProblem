@@ -1,7 +1,7 @@
-﻿using Electrostatics.Core;
-using Electrostatics.Core.GridComponents;
+﻿using DirectProblem.Core;
+using DirectProblem.Core.GridComponents;
 
-namespace Electrostatics.FEM.Assembling;
+namespace DirectProblem.FEM.Assembling;
 
 public interface IMatrixPortraitBuilder<out TMatrix>
 {

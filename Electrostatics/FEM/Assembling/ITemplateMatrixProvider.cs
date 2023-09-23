@@ -1,6 +1,6 @@
-﻿using Electrostatics.Core.Base;
+﻿using DirectProblem.Core.Base;
 
-namespace Electrostatics.FEM.Assembling;
+namespace DirectProblem.FEM.Assembling;
 
 public interface ITemplateMatrixProvider
 {

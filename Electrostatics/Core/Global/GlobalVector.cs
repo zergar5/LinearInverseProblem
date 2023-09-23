@@ -1,4 +1,4 @@
-﻿namespace Electrostatics.Core.Global;
+﻿namespace DirectProblem.Core.Global;
 
 public class GlobalVector
 {
@@ -36,7 +36,7 @@ public class GlobalVector
         return new GlobalVector(clone);
     }
 
-    public GlobalVector Clone(GlobalVector vector)
+    public GlobalVector Copy(GlobalVector vector)
     {
         for (var i = 0; i < Vector.Length; i++)
         {
@@ -65,7 +65,7 @@ public class GlobalVector
     {
         result ??= new GlobalVector(localVector1.Count);
 
-        if (localVector1.Count != localVector2.Count) throw new Exception("Can't sum vectors");
+        if (localVector1.Count != localVector2.Count) throw new ArgumentOutOfRangeException("Can't sum vectors");
 
         for (var i = 0; i < localVector1.Count; i++)
         {
@@ -79,7 +79,7 @@ public class GlobalVector
     {
         result ??= new GlobalVector(localVector1.Count);
 
-        if (localVector1.Count != localVector2.Count) throw new Exception("Can't sum vectors");
+        if (localVector1.Count != localVector2.Count) throw new ArgumentOutOfRangeException("Can't sum vectors");
 
         for (var i = 0; i < localVector1.Count; i++)
         {

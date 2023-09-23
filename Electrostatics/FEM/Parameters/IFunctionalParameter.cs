@@ -1,6 +1,6 @@
-﻿using Electrostatics.Core.GridComponents;
+﻿using DirectProblem.Core.GridComponents;
 
-namespace Electrostatics.FEM.Parameters;
+namespace DirectProblem.FEM.Parameters;
 
 public interface IFunctionalParameter
 {

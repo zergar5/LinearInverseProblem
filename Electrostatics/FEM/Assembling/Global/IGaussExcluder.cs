@@ -1,9 +1,9 @@
-﻿using Electrostatics.Core.Boundary;
-using Electrostatics.Core.Global;
+﻿using DirectProblem.Core.Boundary;
+using DirectProblem.Core.Global;
 
-namespace Electrostatics.FEM.Assembling.Global;
+namespace DirectProblem.FEM.Assembling.Global;
 
 public interface IGaussExcluder<TMatrix>
 {
-    public void Exclude(Equation<TMatrix> equation, FirstCondition condition);
+    public void Exclude(Equation<TMatrix> equation, FirstConditionValue condition);
 }

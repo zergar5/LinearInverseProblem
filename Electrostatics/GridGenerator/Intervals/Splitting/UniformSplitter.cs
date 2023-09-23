@@ -1,8 +1,8 @@
-﻿using Electrostatics.GridGenerator.Area.Core;
+﻿using DirectProblem.GridGenerator.Intervals.Core;
 
-namespace Electrostatics.GridGenerator.Area.Splitting;
+namespace DirectProblem.GridGenerator.Intervals.Splitting;
 
-public readonly record struct UniformSplitter(int Steps) : IntervalSplitter
+public readonly record struct UniformSplitter(int Steps) : IIntervalSplitter
 {
     public IEnumerable<double> EnumerateValues(Interval interval)
     {

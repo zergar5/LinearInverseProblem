@@ -1,4 +1,4 @@
-﻿namespace Electrostatics.Core.GridComponents;
+﻿namespace DirectProblem.Core.Boundary;
 
 public enum Bound
 {

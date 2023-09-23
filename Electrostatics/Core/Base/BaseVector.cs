@@ -1,4 +1,4 @@
-﻿namespace Electrostatics.Core.Base;
+﻿namespace DirectProblem.Core.Base;
 
 public class BaseVector
 {
@@ -32,7 +32,9 @@ public class BaseVector
 
     public static BaseVector Sum(BaseVector vector1, BaseVector vector2, BaseVector? result = null)
     {
-        if (vector1.Count != vector2.Count) throw new Exception("Can't sum vectors");
+        if (vector1.Count != vector2.Count)
+            throw new ArgumentOutOfRangeException(
+                $"{nameof(vector1)} and {nameof(vector2)} must have same size");
 
         result ??= new BaseVector(vector1.Vector);
 

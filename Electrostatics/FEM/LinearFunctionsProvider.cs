@@ -1,4 +1,4 @@
-﻿namespace Electrostatics.FEM;
+﻿namespace DirectProblem.FEM;
 
 public class LinearFunctionsProvider
 {
