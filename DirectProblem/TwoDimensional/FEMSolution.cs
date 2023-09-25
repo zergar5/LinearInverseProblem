@@ -19,7 +19,7 @@ public class FEMSolution
         _basisFunctionsProvider = basisFunctionsProvider;
     }
 
-    public double Calculate(Node2D point)
+    public double CalculatePotential(Node2D point)
     {
         if (AreaHas(point))
         {
@@ -32,9 +32,6 @@ public class FEMSolution
             sum += element.NodesIndexes
                 .Select((t, i) => _solution[t] * basisFunctions[i].Calculate(point))
                 .Sum();
-
-
-            //CourseHolder.WriteSolution(point, sum);
 
             return sum;
         }
@@ -64,7 +61,7 @@ public class FEMSolution
                 .Select((t, i) => _solution[t] * basisFunctions[i].Calculate(firstPoint))
                 .Sum();
 
-            var potentialDifference = (firstPhi - secondPhi) / Math.Abs(firstPoint.Z - secondPoint.Z);
+            var potentialDifference = (firstPhi - secondPhi) / Node2D.Distance(firstPoint, secondPoint);
 
             CourseHolder.WriteSolution(firstPoint, secondPoint, potentialDifference);
 
@@ -83,7 +80,7 @@ public class FEMSolution
 
         for (var i = 0; i < _solution.Count; i++)
         {
-            solution[i] = Calculate(_grid.Nodes[i]);
+            solution[i] = CalculatePotential(_grid.Nodes[i]);
             trueSolution[i] = u(_grid.Nodes[i]);
         }
 

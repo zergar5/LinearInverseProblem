@@ -73,9 +73,9 @@ public class GlobalAssembler<TNode>
         return this;
     }
 
-    public GlobalAssembler<TNode> SetSources(Source[] sources)
+    public GlobalAssembler<TNode> ApplySources()
     {
-        foreach (var source in sources)
+        foreach (var source in _grid.Sources)
         {
             var element = _grid.Elements.First(x => ElementHas(x, source.Point));
 

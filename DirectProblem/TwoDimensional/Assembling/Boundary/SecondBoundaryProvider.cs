@@ -3,20 +3,20 @@ using DirectProblem.Core.Base;
 using DirectProblem.Core.Boundary;
 using DirectProblem.Core.GridComponents;
 using DirectProblem.Core.Local;
-using DirectProblem.FEM.Assembling;
+using DirectProblem.TwoDimensional.Assembling.MatrixTemplates;
 using DirectProblem.TwoDimensional.Parameters;
 using Electrostatics.Calculus;
 
-namespace Electrostatics.TwoDimensional.Assembling.Boundary;
+namespace DirectProblem.TwoDimensional.Assembling.Boundary;
 
 public class SecondBoundaryProvider
 {
     private readonly Grid<Node2D> _grid;
     private readonly MaterialFactory _materialFactory;
-    //private readonly Func<Node2D, double> _u;
+    private readonly Func<Node2D, double> _u;
     private readonly DerivativeCalculator _derivativeCalculator;
-    private readonly BaseMatrix _templateMatrixR;
-    private readonly BaseMatrix _templateMatrixZ;
+    private readonly BaseMatrix _massZ;
+    private readonly BaseMatrix _massR;
     private readonly BaseVector _rBufferVector = new(2);
     private readonly BaseVector _zBufferVector = new(2);
     private BaseVector[]? _vectors;
@@ -25,18 +25,17 @@ public class SecondBoundaryProvider
     (
         Grid<Node2D> grid,
         MaterialFactory materialFactory,
-        //Func<Node2D, double> u,
+        Func<Node2D, double> u,
         DerivativeCalculator derivativeCalculator,
-        ITemplateMatrixProvider templateMatrixProviderR,
-        ITemplateMatrixProvider templateMatrixProviderZ
+        MassMatrixTemplateProvider massMatrixTemplateProvider
     )
     {
         _grid = grid;
         _materialFactory = materialFactory;
-        //_u = u;
+        _u = u;
         _derivativeCalculator = derivativeCalculator;
-        _templateMatrixR = templateMatrixProviderR.GetMatrix();
-        _templateMatrixZ = templateMatrixProviderZ.GetMatrix();
+        _massZ = massMatrixTemplateProvider.MassMatrix;
+        _massR = massMatrixTemplateProvider.MassRMatrix;
     }
 
     public SecondConditionValue[] GetConditions(SecondCondition[] conditions)
@@ -78,21 +77,23 @@ public class SecondBoundaryProvider
     {
         for (var i = 0; i < vector.Count; i++)
         {
-            vector[i] = 0; /*_derivativeCalculator.Calculate(_u, _grid.Nodes[indexes[i]], 'r');*/
+            vector[i] = _derivativeCalculator.Calculate(_u, _grid.Nodes[indexes[i]], 'r');
         }
 
-        //if (bound == Bound.Left)
-        //{
-        //    BaseVector.Multiply(-sigma * h * _grid.Nodes[indexes[0]].R / 6d,
-        //        BaseMatrix.Multiply(_templateMatrixR, vector, _rBufferVector), vector);
-        //    _rBufferVector.Clear();
-        //}
-        //else
-        //{
-        //    BaseVector.Multiply(sigma * h * _grid.Nodes[indexes[0]].R / 6d,
-        //        BaseMatrix.Multiply(_templateMatrixR, vector, _rBufferVector), vector);
-        //    _rBufferVector.Clear();
-        //}
+        BaseMatrix.Multiply(_massR, vector, _rBufferVector);
+
+        if (bound == Bound.Left)
+        {
+            BaseVector.Multiply(-sigma * h * _grid.Nodes[indexes[0]].R / 6d,
+                _rBufferVector, vector);
+        }
+        else
+        {
+            BaseVector.Multiply(sigma * h * _grid.Nodes[indexes[0]].R / 6d,
+                _rBufferVector, vector);
+        }
+
+        _rBufferVector.Clear();
 
         return vector;
     }
@@ -101,35 +102,37 @@ public class SecondBoundaryProvider
     {
         for (var i = 0; i < vector.Count; i++)
         {
-            vector[i] = 0; /*_derivativeCalculator.Calculate(_u, _grid.Nodes[indexes[i]], 'z');*/
+            vector[i] = _derivativeCalculator.Calculate(_u, _grid.Nodes[indexes[i]], 'z');
         }
 
-        //if (bound == Bound.Lower)
-        //{
-        //    BaseVector.Sum
-        //    (
-        //        BaseVector.Multiply(-sigma * h * _grid.Nodes[indexes[0]].R / 6d,
-        //            BaseMatrix.Multiply(_templateMatrixR, vector, _rBufferVector), _rBufferVector),
-        //        BaseVector.Multiply(-sigma * Math.Pow(h, 2) / 12d,
-        //            BaseMatrix.Multiply(_templateMatrixZ, vector, _zBufferVector), _zBufferVector),
-        //        vector
-        //    );
-        //    _rBufferVector.Clear();
-        //    _zBufferVector.Clear();
-        //}
-        //else
-        //{
-        //    BaseVector.Sum
-        //    (
-        //        BaseVector.Multiply(sigma * h * _grid.Nodes[indexes[0]].R / 6d,
-        //            BaseMatrix.Multiply(_templateMatrixR, vector, _rBufferVector), _rBufferVector),
-        //        BaseVector.Multiply(sigma * Math.Pow(h, 2) / 12d,
-        //            BaseMatrix.Multiply(_templateMatrixZ, vector, _zBufferVector), _zBufferVector),
-        //        vector
-        //    );
-        //    _rBufferVector.Clear();
-        //    _zBufferVector.Clear();
-        //}
+        BaseMatrix.Multiply(_massR, vector, _rBufferVector);
+        BaseMatrix.Multiply(_massZ, vector, _zBufferVector);
+
+        if (bound == Bound.Lower)
+        {
+            BaseVector.Sum
+            (
+                BaseVector.Multiply(-sigma * h * _grid.Nodes[indexes[0]].R / 6d,
+                    _rBufferVector, _rBufferVector),
+                BaseVector.Multiply(-sigma * Math.Pow(h, 2) / 12d,
+                    _zBufferVector, _zBufferVector),
+                vector
+            );
+        }
+        else
+        {
+            BaseVector.Sum
+            (
+                BaseVector.Multiply(sigma * h * _grid.Nodes[indexes[0]].R / 6d,
+                    _rBufferVector, _rBufferVector),
+                BaseVector.Multiply(sigma * Math.Pow(h, 2) / 12d,
+                    _zBufferVector, _zBufferVector),
+                vector
+            );
+        }
+
+        _rBufferVector.Clear();
+        _zBufferVector.Clear();
 
         return vector;
     }
@@ -137,18 +140,8 @@ public class SecondBoundaryProvider
     public SecondConditionValue[] GetConditions(int elementsByLength, int elementsByHeight)
     {
         var conditions = new SecondCondition[2 * elementsByLength + elementsByHeight];
-        _vectors = new BaseVector[2 * elementsByLength + elementsByHeight];
-
-        for (var i = 0; i < _vectors.Length; i++)
-        {
-            _vectors[i] = new BaseVector(2);
-        }
 
         var j = 0;
-        for (var i = 0; i < elementsByLength; i++, j++)
-        {
-            conditions[j] = new SecondCondition(i, Bound.Lower);
-        }
 
         for (var i = 0; i < elementsByHeight; i++, j++)
         {

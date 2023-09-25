@@ -14,7 +14,7 @@ public class LLTSparse
 
     public GlobalVector CalcY(SymmetricSparseMatrix sparseMatrix, GlobalVector b, GlobalVector? y = null)
     {
-        y ??= b.Clone();
+        y ??= new GlobalVector(b.Count);
 
         for (var i = 0; i < sparseMatrix.Count; i++)
         {
@@ -31,17 +31,20 @@ public class LLTSparse
 
     public GlobalVector CalcX(SymmetricSparseMatrix sparseMatrix, GlobalVector y, GlobalVector? x = null)
     {
-        x ??= y.Clone();
+        x = x == null ? y.Clone() : y.Copy(x);
 
         for (var i = sparseMatrix.Count - 1; i >= 0; i--)
         {
             x[i] /= sparseMatrix[i, i];
-            foreach (var j in sparseMatrix[i].Reverse())
+            var columns = sparseMatrix[i];
+            for (var j = columns.Length - 1; j >= 0; j--)
             {
-                x[j] -= sparseMatrix[i, j] * x[i];
+                x[columns[j]] -= sparseMatrix[i, columns[j]] * x[i];
             }
         }
 
         return x;
     }
+
+
 }

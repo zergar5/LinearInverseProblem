@@ -1,18 +1,17 @@
-﻿using DirectProblem.Extensions;
-
-namespace DirectProblem.Core.Global;
+﻿namespace DirectProblem.Core.Global;
 
 public class SymmetricSparseMatrix
 {
     private readonly double[] _diagonal;
     private readonly double[] _values;
-    public int[] RowsIndexes { get; }
-    public int[] ColumnsIndexes { get; }
+    private readonly int[] _rowsIndexes;
+    private readonly int[] _columnsIndexes;
+    public ReadOnlySpan<int> RowsIndexes => new(_rowsIndexes);
+    public ReadOnlySpan<int> ColumnsIndexes => new(_columnsIndexes);
 
     public int Count => _diagonal.Length;
 
-    public int[] this[int rowIndex] => ColumnsIndexes[RowsIndexes[rowIndex]..RowsIndexes[rowIndex + 1]];
-
+    public ReadOnlySpan<int> this[int rowIndex] => ColumnsIndexes[RowsIndexes[rowIndex]..RowsIndexes[rowIndex + 1]];
     public double this[int rowIndex, int columnIndex]
     {
         get
@@ -27,8 +26,8 @@ public class SymmetricSparseMatrix
             if (columnIndex > rowIndex)
                 (rowIndex, columnIndex) = (columnIndex, rowIndex);
 
-            var index = this[rowIndex].FindIndex(columnIndex);
-            
+            var index = this[rowIndex].IndexOf(columnIndex);
+
             return _values[index];
         }
         set
@@ -44,7 +43,7 @@ public class SymmetricSparseMatrix
             if (columnIndex > rowIndex)
                 (rowIndex, columnIndex) = (columnIndex, rowIndex);
 
-            var index = this[rowIndex].FindIndex(columnIndex);
+            var index = this[rowIndex].IndexOf(columnIndex);
 
             _values[index] = value;
         }
@@ -52,10 +51,10 @@ public class SymmetricSparseMatrix
 
     public SymmetricSparseMatrix(int[] rowsIndexes, int[] columnsIndexes)
     {
+        _rowsIndexes = rowsIndexes;
+        _columnsIndexes = columnsIndexes;
         _diagonal = new double[rowsIndexes.Length - 1];
         _values = new double[rowsIndexes[^1]];
-        RowsIndexes = rowsIndexes;
-        ColumnsIndexes = columnsIndexes;
     }
 
     public SymmetricSparseMatrix
@@ -66,8 +65,8 @@ public class SymmetricSparseMatrix
         double[] values
     )
     {
-        RowsIndexes = rowsIndexes;
-        ColumnsIndexes = columnsIndexes;
+        _rowsIndexes = rowsIndexes;
+        _columnsIndexes = columnsIndexes;
         _diagonal = diagonal;
         _values = values;
     }
@@ -98,13 +97,13 @@ public class SymmetricSparseMatrix
 
     public SymmetricSparseMatrix Clone()
     {
-        var rowIndexes = new int[RowsIndexes.Length];
-        var columnIndexes = new int[ColumnsIndexes.Length];
+        var rowIndexes = new int[_rowsIndexes.Length];
+        var columnIndexes = new int[_columnsIndexes.Length];
         var diagonal = new double[_diagonal.Length];
         var values = new double[_values.Length];
 
-        Array.Copy(RowsIndexes, rowIndexes, RowsIndexes.Length);
-        Array.Copy(ColumnsIndexes, columnIndexes, ColumnsIndexes.Length);
+        Array.Copy(_rowsIndexes, rowIndexes, _rowsIndexes.Length);
+        Array.Copy(_columnsIndexes, columnIndexes, _columnsIndexes.Length);
         Array.Copy(_diagonal, diagonal, _diagonal.Length);
         Array.Copy(_values, values, _values.Length);
 

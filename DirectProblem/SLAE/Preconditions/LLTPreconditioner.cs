@@ -1,7 +1,6 @@
 ﻿using DirectProblem.Core.Global;
-using DirectProblem.Extensions;
 
-namespace DirectProblem.SLAE.Preconditions.LLT;
+namespace DirectProblem.SLAE.Preconditions;
 
 public class LLTPreconditioner : IPreconditioner<SymmetricSparseMatrix>
 {
@@ -20,7 +19,7 @@ public class LLTPreconditioner : IPreconditioner<SymmetricSparseMatrix>
                 for (var k = preconditionMatrix.RowsIndexes[i]; k < j; k++)
                 {
                     var iPrev = i - preconditionMatrix.ColumnsIndexes[j];
-                    var kPrev = preconditionMatrix[i - iPrev].FindIndex(preconditionMatrix.ColumnsIndexes[k]);
+                    var kPrev = preconditionMatrix[i - iPrev].IndexOf(preconditionMatrix.ColumnsIndexes[k]);
 
                     if (kPrev == -1) continue;
 
@@ -28,11 +27,11 @@ public class LLTPreconditioner : IPreconditioner<SymmetricSparseMatrix>
                            preconditionMatrix[iPrev, preconditionMatrix.ColumnsIndexes[kPrev]];
                 }
 
-                preconditionMatrix[i, j] = (preconditionMatrix[i, j] - sum) /
-                                           preconditionMatrix[preconditionMatrix.ColumnsIndexes[j],
-                                               preconditionMatrix.ColumnsIndexes[j]];
+                preconditionMatrix[i, preconditionMatrix.ColumnsIndexes[j]] =
+                    (preconditionMatrix[i, preconditionMatrix.ColumnsIndexes[j]] - sum) /
+                    preconditionMatrix[preconditionMatrix.ColumnsIndexes[j], preconditionMatrix.ColumnsIndexes[j]];
 
-                sumD += Math.Pow(preconditionMatrix[i, j], 2);
+                sumD += Math.Pow(preconditionMatrix[i, preconditionMatrix.ColumnsIndexes[j]], 2);
             }
 
             preconditionMatrix[i, i] = Math.Sqrt(preconditionMatrix[i, i] - sumD);
