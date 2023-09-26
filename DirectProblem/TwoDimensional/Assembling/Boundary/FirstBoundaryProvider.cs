@@ -9,7 +9,7 @@ public class FirstBoundaryProvider
 {
     private readonly Grid<Node2D> _grid;
     private readonly Func<Node2D, double> _u;
-    private BaseVector[]? _vectors;
+    private double[][]? _buffers;
 
     public FirstBoundaryProvider(Grid<Node2D> grid, Func<Node2D, double> u)
     {
@@ -21,13 +21,13 @@ public class FirstBoundaryProvider
     {
         var conditionsValues = new FirstConditionValue[conditions.Length];
 
-        if (_vectors is null)
+        if (_buffers is null)
         {
-            _vectors = new BaseVector[conditionsValues.Length];
+            _buffers = new double [conditionsValues.Length][];
 
             for (var i = 0; i < conditions.Length; i++)
             {
-                _vectors[i] = new BaseVector(2);
+                _buffers[i] = new double[2];
             }
         }
 
@@ -35,14 +35,12 @@ public class FirstBoundaryProvider
         {
             var (indexes, _) = _grid.Elements[conditions[i].ElementIndex].GetBoundNodeIndexes(conditions[i].Bound);
 
-            var values = new double[indexes.Length];
-
             for (var j = 0; j < indexes.Length; j++)
             {
-                values[j] = Calculate(indexes[j]);
+                _buffers[i][j] = Calculate(indexes[j]);
             }
 
-            conditionsValues[i] = new FirstConditionValue(indexes, values);
+            conditionsValues[i] = new FirstConditionValue(indexes, _buffers[i]);
         }
 
         return conditionsValues;

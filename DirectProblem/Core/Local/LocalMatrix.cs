@@ -5,9 +5,9 @@ namespace DirectProblem.Core.Local;
 public class LocalMatrix
 {
     public int[] Indexes { get; }
-    public BaseMatrix Matrix { get; }
+    public Matrix Matrix { get; }
 
-    public LocalMatrix(int[] indexes, BaseMatrix matrix)
+    public LocalMatrix(int[] indexes, Matrix matrix)
     {
         Matrix = matrix;
         Indexes = indexes;

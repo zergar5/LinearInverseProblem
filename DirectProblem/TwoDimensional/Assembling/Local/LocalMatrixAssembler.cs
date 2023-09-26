@@ -9,14 +9,14 @@ namespace DirectProblem.TwoDimensional.Assembling.Local;
 public class LocalMatrixAssembler : ILocalMatrixAssembler
 {
     private readonly Grid<Node2D> _grid;
-    private readonly BaseMatrix _stiffnessTemplate;
-    private readonly BaseMatrix _massTemplate;
-    private readonly BaseMatrix _massRTemplate;
-    private readonly BaseMatrix _stiffness = new(4);
-    private readonly BaseMatrix _stiffnessR = new(2);
-    private readonly BaseMatrix _stiffnessZ = new(2);
-    private readonly BaseMatrix _massR = new(2);
-    private readonly BaseMatrix _massZ = new(2);
+    private readonly Matrix _stiffnessTemplate;
+    private readonly Matrix _massTemplate;
+    private readonly Matrix _massRTemplate;
+    private readonly Matrix _stiffness = new(4);
+    private readonly Matrix _stiffnessR = new(2);
+    private readonly Matrix _stiffnessZ = new(2);
+    private readonly Matrix _massR = new(2);
+    private readonly Matrix _massZ = new(2);
 
     public LocalMatrixAssembler
     (
@@ -31,7 +31,7 @@ public class LocalMatrixAssembler : ILocalMatrixAssembler
         _massRTemplate = massMatrixTemplateProvider.MassRMatrix;
     }
 
-    public BaseMatrix AssembleStiffnessMatrix(Element element)
+    public Matrix AssembleStiffnessMatrix(Element element)
     {
         var stiffnessR = AssembleStiffnessR(element);
         var stiffnessZ = AssembleStiffnessZ(element);
@@ -52,38 +52,38 @@ public class LocalMatrixAssembler : ILocalMatrixAssembler
         return _stiffness;
     }
 
-    private BaseMatrix AssembleStiffnessR(Element element)
+    private Matrix AssembleStiffnessR(Element element)
     {
-        BaseMatrix.Multiply((2 * _grid.Nodes[element.NodesIndexes[0]].R + element.Length) / (2 * element.Length),
+        Matrix.Multiply((2 * _grid.Nodes[element.NodesIndexes[0]].R + element.Length) / (2 * element.Length),
             _stiffnessTemplate, _stiffnessR);
 
         return _stiffnessR;
     }
 
-    private BaseMatrix AssembleStiffnessZ(Element element)
+    private Matrix AssembleStiffnessZ(Element element)
     {
-        BaseMatrix.Multiply(1d / element.Height,
+        Matrix.Multiply(1d / element.Height,
             _stiffnessTemplate, _stiffnessZ);
 
         return _stiffnessZ;
     }
 
-    private BaseMatrix AssembleMassR(Element element)
+    private Matrix AssembleMassR(Element element)
     {
-        BaseMatrix.Multiply(Math.Pow(element.Length, 2) / 12d,
+        Matrix.Multiply(Math.Pow(element.Length, 2) / 12d,
             _massRTemplate, _massR);
 
-        BaseMatrix.Multiply(element.Length * _grid.Nodes[element.NodesIndexes[0]].R / 6d,
+        Matrix.Multiply(element.Length * _grid.Nodes[element.NodesIndexes[0]].R / 6d,
             _massTemplate, _massZ);
 
-        BaseMatrix.Sum(_massR, _massZ, _massR);
+        Matrix.Sum(_massR, _massZ, _massR);
 
         return _massR;
     }
 
-    private BaseMatrix AssembleMassZ(Element element)
+    private Matrix AssembleMassZ(Element element)
     {
-        BaseMatrix.Multiply(element.Height / 6d,
+        Matrix.Multiply(element.Height / 6d,
             _massTemplate, _massZ);
 
         return _massZ;

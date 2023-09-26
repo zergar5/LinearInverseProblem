@@ -1,4 +1,5 @@
 ﻿using DirectProblem.Core;
+using DirectProblem.Core.Base;
 using DirectProblem.Core.Global;
 using DirectProblem.Core.GridComponents;
 using DirectProblem.FEM;
@@ -9,10 +10,10 @@ namespace Electrostatics.TwoDimensional;
 public class FEMSolution
 {
     private readonly Grid<Node2D> _grid;
-    private readonly GlobalVector _solution;
+    private readonly Vector _solution;
     private readonly LocalBasisFunctionsProvider _basisFunctionsProvider;
 
-    public FEMSolution(Grid<Node2D> grid, GlobalVector solution, LocalBasisFunctionsProvider basisFunctionsProvider)
+    public FEMSolution(Grid<Node2D> grid, Vector solution, LocalBasisFunctionsProvider basisFunctionsProvider)
     {
         _grid = grid;
         _solution = solution;
@@ -61,7 +62,7 @@ public class FEMSolution
                 .Select((t, i) => _solution[t] * basisFunctions[i].Calculate(firstPoint))
                 .Sum();
 
-            var potentialDifference = (firstPhi - secondPhi) / Node2D.Distance(firstPoint, secondPoint);
+            var potentialDifference = firstPhi - secondPhi;
 
             CourseHolder.WriteSolution(firstPoint, secondPoint, potentialDifference);
 
@@ -75,8 +76,8 @@ public class FEMSolution
 
     public double CalcError(Func<Node2D, double> u)
     {
-        var solution = new GlobalVector(_solution.Count);
-        var trueSolution = new GlobalVector(_solution.Count);
+        var solution = new Vector(_solution.Count);
+        var trueSolution = new Vector(_solution.Count);
 
         for (var i = 0; i < _solution.Count; i++)
         {
@@ -84,7 +85,7 @@ public class FEMSolution
             trueSolution[i] = u(_grid.Nodes[i]);
         }
 
-        GlobalVector.Subtract(solution, trueSolution, trueSolution);
+        Vector.Subtract(solution, trueSolution, trueSolution);
 
         return trueSolution.Norm;
     }

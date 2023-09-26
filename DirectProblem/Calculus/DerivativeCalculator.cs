@@ -36,4 +36,24 @@ public class DerivativeCalculator
         }
         return result / (2.0 * Delta);
     }
+
+    public double Calculate(Func<double, double> function, double variable)
+    {
+        return function(variable + Delta) - function(variable - Delta) / (2.0 * Delta);
+    }
+
+    public double Calculate(Func<double[], double> function, double[] variables, int variableIndex)
+    {
+        var buffer = variables[variableIndex];
+
+        variables[variableIndex] = buffer + Delta;
+        var fLeft = function(variables);
+
+        variables[variableIndex] = buffer - Delta;
+        var fRight = function(variables);
+
+        variables[variableIndex] = buffer;
+
+        return (fLeft - fRight) / (2.0 * Delta);
+    }
 }

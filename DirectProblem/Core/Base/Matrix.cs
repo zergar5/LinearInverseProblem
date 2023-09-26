@@ -1,14 +1,16 @@
-﻿namespace DirectProblem.Core.Base;
+﻿using System.Runtime.InteropServices.Marshalling;
 
-public class BaseMatrix
+namespace DirectProblem.Core.Base;
+
+public class Matrix
 {
     public double[,] Values { get; }
 
-    public BaseMatrix(double[,] matrix)
+    public Matrix(double[,] matrix)
     {
         Values = matrix;
     }
-    public BaseMatrix(int n) : this(new double[n, n]) { }
+    public Matrix(int n) : this(new double[n, n]) { }
 
     public int CountRows => Values.GetLength(0);
     public int CountColumns => Values.GetLength(1);
@@ -19,13 +21,13 @@ public class BaseMatrix
         set => Values[i, j] = value;
     }
 
-    public static BaseMatrix Sum(BaseMatrix matrix1, BaseMatrix matrix2, BaseMatrix? result = null)
+    public static Matrix Sum(Matrix matrix1, Matrix matrix2, Matrix? result = null)
     {
         if (matrix1.CountRows != matrix2.CountRows || matrix1.CountColumns != matrix2.CountColumns)
             throw new ArgumentOutOfRangeException(
                 $"{nameof(matrix1)} and {nameof(matrix2)} must have same size");
 
-        result ??= new BaseMatrix(matrix1.CountRows);
+        result ??= new Matrix(matrix1.CountRows);
 
         for (var i = 0; i < matrix1.CountRows; i++)
         {
@@ -38,9 +40,9 @@ public class BaseMatrix
         return result;
     }
 
-    public static BaseMatrix Multiply(double coefficient, BaseMatrix matrix, BaseMatrix? result = null)
+    public static Matrix Multiply(double coefficient, Matrix matrix, Matrix? result = null)
     {
-        result ??= new BaseMatrix(matrix.CountRows);
+        result ??= new Matrix(matrix.CountRows);
 
         for (var i = 0; i < matrix.CountRows; i++)
         {
@@ -53,13 +55,13 @@ public class BaseMatrix
         return result;
     }
 
-    public static BaseVector Multiply(BaseMatrix matrix, BaseVector vector, BaseVector? result = null)
+    public static Vector Multiply(Matrix matrix, Vector vector, Vector? result = null)
     {
         if (matrix.CountRows != vector.Count)
             throw new ArgumentOutOfRangeException(
                 $"{nameof(matrix)} and {nameof(vector)} must have same size");
 
-        result ??= new BaseVector(vector.Count);
+        result ??= new Vector(vector.Count);
 
         for (var i = 0; i < matrix.CountRows; i++)
         {
@@ -72,7 +74,7 @@ public class BaseMatrix
         return result;
     }
 
-    public static Span<double> Multiply(BaseMatrix matrix, Span<double> vector, Span<double> result)
+    public static Span<double> Multiply(Matrix matrix, Span<double> vector, Span<double> result)
     {
         if (matrix.CountRows != vector.Length || vector.Length != result.Length)
             throw new ArgumentOutOfRangeException(
@@ -87,5 +89,13 @@ public class BaseMatrix
         }
 
         return result;
+    }
+
+    public void SwapRows(int row1, int row2)
+    {
+        for (var i = 0; i < CountColumns; i++)
+        {
+            (Values[row2, i], Values[row1, i]) = (Values[row1, i], Values[row2, i]);
+        }
     }
 }

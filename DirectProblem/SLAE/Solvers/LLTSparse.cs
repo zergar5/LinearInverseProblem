@@ -1,10 +1,11 @@
-﻿using DirectProblem.Core.Global;
+﻿using DirectProblem.Core.Base;
+using DirectProblem.Core.Global;
 
 namespace DirectProblem.SLAE.Solvers;
 
 public class LLTSparse
 {
-    public GlobalVector Solve(SymmetricSparseMatrix matrix, GlobalVector vector, GlobalVector? result = null)
+    public Vector Solve(SymmetricSparseMatrix matrix, Vector vector, Vector? result = null)
     {
         var y = CalcY(matrix, vector, result);
         var x = CalcX(matrix, y, y);
@@ -12,9 +13,9 @@ public class LLTSparse
         return x;
     }
 
-    public GlobalVector CalcY(SymmetricSparseMatrix sparseMatrix, GlobalVector b, GlobalVector? y = null)
+    public Vector CalcY(SymmetricSparseMatrix sparseMatrix, Vector b, Vector? y = null)
     {
-        y ??= new GlobalVector(b.Count);
+        y ??= new Vector(b.Count);
 
         for (var i = 0; i < sparseMatrix.Count; i++)
         {
@@ -29,7 +30,7 @@ public class LLTSparse
         return y;
     }
 
-    public GlobalVector CalcX(SymmetricSparseMatrix sparseMatrix, GlobalVector y, GlobalVector? x = null)
+    public Vector CalcX(SymmetricSparseMatrix sparseMatrix, Vector y, Vector? x = null)
     {
         x = x == null ? y.Clone() : y.Copy(x);
 

@@ -5,5 +5,5 @@ namespace DirectProblem.FEM.Assembling.Local;
 
 public interface ILocalMatrixAssembler
 {
-    public BaseMatrix AssembleStiffnessMatrix(Element element);
+    public Matrix AssembleStiffnessMatrix(Element element);
 }

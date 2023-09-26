@@ -15,11 +15,11 @@ public class SecondBoundaryProvider
     private readonly MaterialFactory _materialFactory;
     private readonly Func<Node2D, double> _u;
     private readonly DerivativeCalculator _derivativeCalculator;
-    private readonly BaseMatrix _massZ;
-    private readonly BaseMatrix _massR;
-    private readonly BaseVector _rBufferVector = new(2);
-    private readonly BaseVector _zBufferVector = new(2);
-    private BaseVector[]? _vectors;
+    private readonly Matrix _massZ;
+    private readonly Matrix _massR;
+    private readonly Vector _rBufferVector = new(2);
+    private readonly Vector _zBufferVector = new(2);
+    private Vector[]? _vectors;
 
     public SecondBoundaryProvider
     (
@@ -44,11 +44,11 @@ public class SecondBoundaryProvider
 
         if (_vectors is null)
         {
-            _vectors = new BaseVector[conditions.Length];
+            _vectors = new Vector[conditions.Length];
 
             for (var i = 0; i < _vectors.Length; i++)
             {
-                _vectors[i] = new BaseVector(2);
+                _vectors[i] = new Vector(2);
             }
         }
 
@@ -73,23 +73,23 @@ public class SecondBoundaryProvider
         return conditionsValue;
     }
 
-    private BaseVector GetRVector(int[] indexes, Bound bound, double h, double sigma, BaseVector vector)
+    private Vector GetRVector(int[] indexes, Bound bound, double h, double sigma, Vector vector)
     {
         for (var i = 0; i < vector.Count; i++)
         {
             vector[i] = _derivativeCalculator.Calculate(_u, _grid.Nodes[indexes[i]], 'r');
         }
 
-        BaseMatrix.Multiply(_massR, vector, _rBufferVector);
+        Matrix.Multiply(_massR, vector, _rBufferVector);
 
         if (bound == Bound.Left)
         {
-            BaseVector.Multiply(-sigma * h * _grid.Nodes[indexes[0]].R / 6d,
+            Vector.Multiply(-sigma * h * _grid.Nodes[indexes[0]].R / 6d,
                 _rBufferVector, vector);
         }
         else
         {
-            BaseVector.Multiply(sigma * h * _grid.Nodes[indexes[0]].R / 6d,
+            Vector.Multiply(sigma * h * _grid.Nodes[indexes[0]].R / 6d,
                 _rBufferVector, vector);
         }
 
@@ -98,34 +98,34 @@ public class SecondBoundaryProvider
         return vector;
     }
 
-    private BaseVector GetZVector(int[] indexes, Bound bound, double h, double sigma, BaseVector vector)
+    private Vector GetZVector(int[] indexes, Bound bound, double h, double sigma, Vector vector)
     {
         for (var i = 0; i < vector.Count; i++)
         {
             vector[i] = _derivativeCalculator.Calculate(_u, _grid.Nodes[indexes[i]], 'z');
         }
 
-        BaseMatrix.Multiply(_massR, vector, _rBufferVector);
-        BaseMatrix.Multiply(_massZ, vector, _zBufferVector);
+        Matrix.Multiply(_massR, vector, _rBufferVector);
+        Matrix.Multiply(_massZ, vector, _zBufferVector);
 
         if (bound == Bound.Lower)
         {
-            BaseVector.Sum
+            Vector.Sum
             (
-                BaseVector.Multiply(-sigma * h * _grid.Nodes[indexes[0]].R / 6d,
+                Vector.Multiply(-sigma * h * _grid.Nodes[indexes[0]].R / 6d,
                     _rBufferVector, _rBufferVector),
-                BaseVector.Multiply(-sigma * Math.Pow(h, 2) / 12d,
+                Vector.Multiply(-sigma * Math.Pow(h, 2) / 12d,
                     _zBufferVector, _zBufferVector),
                 vector
             );
         }
         else
         {
-            BaseVector.Sum
+            Vector.Sum
             (
-                BaseVector.Multiply(sigma * h * _grid.Nodes[indexes[0]].R / 6d,
+                Vector.Multiply(sigma * h * _grid.Nodes[indexes[0]].R / 6d,
                     _rBufferVector, _rBufferVector),
-                BaseVector.Multiply(sigma * Math.Pow(h, 2) / 12d,
+                Vector.Multiply(sigma * Math.Pow(h, 2) / 12d,
                     _zBufferVector, _zBufferVector),
                 vector
             );

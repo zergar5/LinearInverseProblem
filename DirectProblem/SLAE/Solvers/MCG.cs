@@ -1,4 +1,5 @@
-﻿using DirectProblem.Core.Global;
+﻿using DirectProblem.Core.Base;
+using DirectProblem.Core.Global;
 using DirectProblem.FEM;
 using DirectProblem.SLAE.Preconditions;
 
@@ -9,8 +10,8 @@ public class MCG
     private readonly LLTPreconditioner _lltPreconditioner;
     private readonly LLTSparse _lltSparse;
     private SymmetricSparseMatrix _preconditionMatrix;
-    private GlobalVector _r;
-    private GlobalVector _z;
+    private Vector _r;
+    private Vector _z;
 
     public MCG(LLTPreconditioner lltPreconditioner, LLTSparse lltSparse)
     {
@@ -22,12 +23,12 @@ public class MCG
     {
         _preconditionMatrix = _lltPreconditioner.Decompose(_preconditionMatrix);
 
-        _r = GlobalVector.Subtract(equation.RightSide,
+        _r = Vector.Subtract(equation.RightSide,
             SymmetricSparseMatrix.Multiply(equation.Matrix, equation.Solution, _r), _r);
         _z = _lltSparse.Solve(_preconditionMatrix, _r);
     }
 
-    public GlobalVector Solve(Equation<SymmetricSparseMatrix> equation, SymmetricSparseMatrix preconditionMatrix)
+    public Vector Solve(Equation<SymmetricSparseMatrix> equation, SymmetricSparseMatrix preconditionMatrix)
     {
         _preconditionMatrix = preconditionMatrix;
         PrepareProcess(equation);
@@ -38,8 +39,8 @@ public class MCG
     private void IterationProcess(Equation<SymmetricSparseMatrix> equation)
     {
         var x = equation.Solution;
-        var rzBufferVector = new GlobalVector(x.Count);
-        var xBufferVector = new GlobalVector(x.Count);
+        var rzBufferVector = new Vector(x.Count);
+        var xBufferVector = new Vector(x.Count);
 
         var bNorm = equation.RightSide.Norm;
         var residual = _r.Norm / bNorm;
@@ -47,26 +48,26 @@ public class MCG
         for (var i = 1; i <= MethodsConfig.MaxIterations && residual > Math.Pow(MethodsConfig.Eps, 2); i++)
         {
             rzBufferVector = _r.Copy(rzBufferVector);
-            var scalarMrR = GlobalVector.ScalarProduct(_lltSparse.Solve(_preconditionMatrix, _r, rzBufferVector),
+            var scalarMrR = Vector.ScalarProduct(_lltSparse.Solve(_preconditionMatrix, _r, rzBufferVector),
                 _r);
 
             var AxZ = SymmetricSparseMatrix.Multiply(equation.Matrix, _z, xBufferVector);
 
-            var alphaK = scalarMrR / GlobalVector.ScalarProduct(AxZ, _z);
+            var alphaK = scalarMrR / Vector.ScalarProduct(AxZ, _z);
 
-            GlobalVector.Sum(x, GlobalVector.Multiply(alphaK, _z, rzBufferVector),
+            Vector.Sum(x, Vector.Multiply(alphaK, _z, rzBufferVector),
                 x);
 
-            var rNext = GlobalVector.Subtract(_r,
-                GlobalVector.Multiply(alphaK, AxZ, AxZ), _r);
+            var rNext = Vector.Subtract(_r,
+                Vector.Multiply(alphaK, AxZ, AxZ), _r);
 
             xBufferVector = rNext.Copy(xBufferVector);
-            var betaK = GlobalVector.ScalarProduct(_lltSparse.Solve(_preconditionMatrix, rNext, xBufferVector),
+            var betaK = Vector.ScalarProduct(_lltSparse.Solve(_preconditionMatrix, rNext, xBufferVector),
                             rNext) / scalarMrR;
 
             xBufferVector = rNext.Copy(xBufferVector);
-            var zNext = GlobalVector.Sum(_lltSparse.Solve(_preconditionMatrix, rNext, xBufferVector),
-                GlobalVector.Multiply(betaK, _z, _z), _z);
+            var zNext = Vector.Sum(_lltSparse.Solve(_preconditionMatrix, rNext, xBufferVector),
+                Vector.Multiply(betaK, _z, _z), _z);
 
             residual = rNext.Norm / bNorm;
 

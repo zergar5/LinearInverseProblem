@@ -1,4 +1,5 @@
-﻿using DirectProblem.Core.Global;
+﻿using DirectProblem.Core.Base;
+using DirectProblem.Core.Global;
 using DirectProblem.Core.Local;
 using DirectProblem.FEM.Assembling;
 
@@ -25,7 +26,7 @@ public class Inserter : IInserter<SymmetricSparseMatrix>
         }
     }
 
-    public void InsertVector(GlobalVector globalVector, LocalVector localVector)
+    public void InsertVector(Vector globalVector, LocalVector localVector)
     {
         for (var i = 0; i < localVector.Count; i++)
         {

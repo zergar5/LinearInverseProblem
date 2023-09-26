@@ -1,4 +1,6 @@
-﻿namespace DirectProblem.Core.Global;
+﻿using DirectProblem.Core.Base;
+
+namespace DirectProblem.Core.Global;
 
 public class SymmetricSparseMatrix
 {
@@ -71,13 +73,13 @@ public class SymmetricSparseMatrix
         _values = values;
     }
 
-    public static GlobalVector Multiply(SymmetricSparseMatrix matrix, GlobalVector vector, GlobalVector? result = null)
+    public static Vector Multiply(SymmetricSparseMatrix matrix, Vector vector, Vector? result = null)
     {
         if (matrix.Count != vector.Count)
             throw new ArgumentOutOfRangeException(
                 $"{nameof(matrix)} and {nameof(vector)} must have same size");
 
-        result ??= new GlobalVector(matrix.Count);
+        result ??= new Vector(matrix.Count);
 
         var rowsIndexes = matrix.RowsIndexes;
 

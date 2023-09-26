@@ -4,14 +4,14 @@ namespace DirectProblem.TwoDimensional.Assembling.MatrixTemplates;
 
 public class MassMatrixTemplateProvider
 {
-    public BaseMatrix MassMatrix => new(
+    public Matrix MassMatrix => new(
         new[,]
         {
             { 2d, 1d },
             { 1d, 2d }
         });
 
-    public BaseMatrix MassRMatrix => new(
+    public Matrix MassRMatrix => new(
         new[,]
         {
             { 1d, 1d },

@@ -11,4 +11,8 @@
     <ProjectReference Include="..\DirectProblem\DirectProblem.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Calculus\" />
+  </ItemGroup>
+
 </Project>

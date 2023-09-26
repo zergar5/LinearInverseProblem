@@ -21,7 +21,7 @@ public class GlobalAssembler<TNode>
     private readonly LocalBasisFunctionsProvider _localBasisFunctionsProvider;
     private Equation<SymmetricSparseMatrix> _equation;
     private SymmetricSparseMatrix _preconditionMatrix;
-    private BaseVector _bufferVector = new(4);
+    private Vector _bufferVector = new(4);
 
     public GlobalAssembler
     (
@@ -47,8 +47,8 @@ public class GlobalAssembler<TNode>
         _preconditionMatrix = globalMatrix.Clone();
         _equation = new Equation<SymmetricSparseMatrix>(
             globalMatrix,
-            new GlobalVector(_grid.Nodes.Length),
-            new GlobalVector(_grid.Nodes.Length)
+            new Vector(_grid.Nodes.Length),
+            new Vector(_grid.Nodes.Length)
         );
 
         foreach (var element in _grid)
@@ -83,7 +83,7 @@ public class GlobalAssembler<TNode>
 
             for (var i = 0; i < element.NodesIndexes.Length; i++)
             {
-                _bufferVector[i] = source.Power * basisFunctions[i].Calculate(source.Point);
+                _bufferVector[i] = source.Current * basisFunctions[i].Calculate(source.Point);
             }
 
             _inserter.InsertVector(_equation.RightSide, new LocalVector(element.NodesIndexes, _bufferVector));
