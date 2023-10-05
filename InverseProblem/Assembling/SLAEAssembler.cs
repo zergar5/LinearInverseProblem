@@ -100,6 +100,12 @@ public class SLAEAssembler
 
     private void AssembleSLAE()
     {
+        AssembleMatrix();
+        AssembleRightPart();
+    }
+
+    private void AssembleMatrix()
+    {
         for (var q = 0; q < _equation.Matrix.CountRows; q++)
         {
             for (var s = 0; s < _equation.Matrix.CountColumns; s++)
@@ -112,14 +118,20 @@ public class SLAEAssembler
                         _potentialDifferenceFunctionProvider.CreateForSeveralSources(_sourcesLines, _receiversLines[i], _sigma);
                     var derivativeByQ =
                         _derivativeCalculator.Calculate(potentialDifferenceFunction, _equation.Solution.Values, q);
-                    var derivativeByS = 
+                    var derivativeByS =
                         _derivativeCalculator.Calculate(potentialDifferenceFunction, _equation.Solution.Values, s);
 
                     _equation.Matrix[q, s] += _weightsSquares[i] * derivativeByQ * derivativeByS;
                 }
             }
+        }
+    }
 
-            _equation.RightSide[q] = 0;
+    private void AssembleRightPart()
+    {
+        for (var q = 0; q < _equation.Matrix.CountRows; q++)
+        {
+            _equation.RightPart[q] = 0;
 
             for (var i = 0; i < _equation.Matrix.CountColumns; i++)
             {
@@ -128,7 +140,7 @@ public class SLAEAssembler
                 var derivativeByQ =
                     _derivativeCalculator.Calculate(potentialDifferenceFunction, _equation.Solution.Values, q);
 
-                _equation.RightSide[q] -= _weightsSquares[i] *
+                _equation.RightPart[q] -= _weightsSquares[i] *
                                           (potentialDifferenceFunction(_equation.Solution.Values) - _truePotentialDifferences[i]) *
                                           derivativeByQ;
             }

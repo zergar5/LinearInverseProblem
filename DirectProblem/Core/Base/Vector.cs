@@ -43,33 +43,33 @@ public class Vector
         return ScalarProduct(this, vector);
     }
 
-    public static Vector Sum(Vector localVector1, Vector localVector2, Vector? result = null)
+    public static Vector Sum(Vector vector1, Vector vector2, Vector? result = null)
     {
-        result ??= new Vector(localVector1.Count);
+        result ??= new Vector(vector1.Count);
 
-        if (localVector1.Count != localVector2.Count) 
+        if (vector1.Count != vector2.Count) 
             throw new ArgumentOutOfRangeException(
-            $"{nameof(localVector1)} and {nameof(localVector2)} must have same size");
+            $"{nameof(vector1)} and {nameof(vector2)} must have same size");
 
-        for (var i = 0; i < localVector1.Count; i++)
+        for (var i = 0; i < vector1.Count; i++)
         {
-            result[i] = localVector1[i] + localVector2[i];
+            result[i] = vector1[i] + vector2[i];
         }
 
         return result;
     }
 
-    public static Vector Subtract(Vector localVector1, Vector localVector2, Vector? result = null)
+    public static Vector Subtract(Vector vector1, Vector vector2, Vector? result = null)
     {
-        result ??= new Vector(localVector1.Count);
+        result ??= new Vector(vector1.Count);
 
-        if (localVector1.Count != localVector2.Count) 
+        if (vector1.Count != vector2.Count) 
             throw new ArgumentOutOfRangeException(
-            $"{nameof(localVector1)} and {nameof(localVector2)} must have same size");
+            $"{nameof(vector1)} and {nameof(vector2)} must have same size");
 
-        for (var i = 0; i < localVector1.Count; i++)
+        for (var i = 0; i < vector1.Count; i++)
         {
-            result[i] = localVector1[i] - localVector2[i];
+            result[i] = vector1[i] - vector2[i];
         }
 
         return result;
@@ -99,18 +99,18 @@ public class Vector
 
     public Vector Clone()
     {
-        var clone = new double[Count];
-        Array.Copy(Values, clone, Count);
+        var clone = (double[])Values.Clone();
 
         return new Vector(clone);
     }
 
     public Vector Copy(Vector vector)
     {
-        for (var i = 0; i < Values.Length; i++)
-        {
-            vector[i] = Values[i];
-        }
+        if (Count != vector.Count)
+            throw new ArgumentOutOfRangeException(
+                $"{nameof(Values)}  and  {nameof(vector)} must have same size");
+
+        Array.Copy(Values, vector.Values, Count);
 
         return vector;
     }

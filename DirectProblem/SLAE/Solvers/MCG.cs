@@ -23,7 +23,7 @@ public class MCG
     {
         _preconditionMatrix = _lltPreconditioner.Decompose(_preconditionMatrix);
 
-        _r = Vector.Subtract(equation.RightSide,
+        _r = Vector.Subtract(equation.RightPart,
             SymmetricSparseMatrix.Multiply(equation.Matrix, equation.Solution, _r), _r);
         _z = _lltSparse.Solve(_preconditionMatrix, _r);
     }
@@ -42,7 +42,7 @@ public class MCG
         var rzBufferVector = new Vector(x.Count);
         var xBufferVector = new Vector(x.Count);
 
-        var bNorm = equation.RightSide.Norm;
+        var bNorm = equation.RightPart.Norm;
         var residual = _r.Norm / bNorm;
 
         for (var i = 1; i <= MethodsConfig.MaxIterations && residual > Math.Pow(MethodsConfig.Eps, 2); i++)

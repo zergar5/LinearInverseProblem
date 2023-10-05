@@ -7,73 +7,53 @@ namespace InverseProblem.SLAE;
 public class Regularizer
 {
     private readonly GaussElimination _gaussElimination;
-    private readonly Matrix _identityMatrix;
-    private readonly Vector _trueCurrentsVector;
-    private readonly Matrix _bufferMatrix;
-    private readonly Vector _bufferVector;
+    public Matrix IdentityMatrix { get; set; }
+    public Matrix BufferMatrix { get; set; }
+    public Vector BufferVector { get; set; }
 
-    public Regularizer(GaussElimination gaussElimination, Matrix identityMatrix, double[] trueCurrents)
+    public Regularizer(GaussElimination gaussElimination)
     {
         _gaussElimination = gaussElimination;
-        _identityMatrix = identityMatrix;
-        _trueCurrentsVector = new Vector(trueCurrents);
-        _bufferMatrix = new Matrix(identityMatrix.CountRows);
-        _bufferVector = new Vector(_bufferMatrix.CountRows);
     }
 
-    public double Regularize(Equation<Matrix> equation)
+    public double Regularize(Equation<Matrix> equation, Vector trueCurrents)
     {
         var alpha = CalculateAlpha(equation.Matrix);
-
-        while (true)
-        {
-            try
-            {
-                Matrix.Sum(equation.Matrix, Matrix.Multiply(alpha, _identityMatrix, _bufferMatrix), _bufferMatrix);
-
-                Vector.Subtract(equation.RightSide,
-                    Vector.Multiply(alpha, 
-                        Vector.Subtract(equation.Solution, _trueCurrentsVector, _bufferVector), 
-                        _bufferVector), 
-                    _bufferVector);
-
-                _gaussElimination.Solve(equation);
-
-                break;
-            }
-            catch (Exception)
-            {
-                alpha *= 10;
-            }
-        }
-
-        var countStable = 0;
-        var error = CalculateError(equation.Solution, _trueCurrentsVector);
+        var error = CalculateError(equation.Solution, trueCurrents);
+        var ratio = 0d;
 
         do
         {
-            Matrix.Sum(equation.Matrix, Matrix.Multiply(alpha, _identityMatrix, _bufferMatrix), _bufferMatrix);
+            try
+            {
+                Matrix.Sum(equation.Matrix, Matrix.Multiply(alpha, IdentityMatrix, BufferMatrix), BufferMatrix);
 
-            Vector.Subtract(equation.RightSide,
-                Vector.Multiply(alpha,
-                    Vector.Subtract(equation.Solution, _trueCurrentsVector, _bufferVector),
-                    _bufferVector),
-                _bufferVector);
+                Vector.Subtract(
+                    equation.RightPart, Vector.Multiply(
+                        alpha, Vector.Subtract(equation.Solution, trueCurrents, BufferVector),
+                        BufferVector),
+                    BufferVector);
 
-            _gaussElimination.Solve(equation);
+                //BufferVector = equation.RightPart.Copy(BufferVector);
 
-            var currentError = CalculateError(equation.Solution, _trueCurrentsVector);
+                BufferVector = _gaussElimination.Solve(BufferMatrix, BufferVector);
 
-            var ratio = error / currentError;
+                var currentError = CalculateError(
+                    Vector.Sum(equation.Solution, BufferVector, BufferVector), trueCurrents);
 
-            if (ratio is > 0.9 and < 1d) {countStable++;}
-            else countStable = 0;
+                ratio = currentError / error;
+            }
+            catch
+            {
+                alpha *= 1.5;
+            }
+            finally
+            {
+                alpha *= 1.5;
+            }
+        } while (ratio < 2d);
 
-            error = currentError;
-
-        } while (countStable < 4);
-
-        return alpha;
+        return alpha / 1.5;
     }
 
     private double CalculateAlpha(Matrix matrix)

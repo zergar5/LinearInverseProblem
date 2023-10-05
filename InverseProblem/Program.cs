@@ -15,6 +15,14 @@
 //using Electrostatics.TwoDimensional.Assembling.Global;
 //using System.Globalization;
 
+using DirectProblem.Core.Base;
+using DirectProblem.Core.GridComponents;
+using Electrostatics.Calculus;
+using InverseProblem;
+using InverseProblem.Assembling;
+using InverseProblem.Calculus;
+using InverseProblem.SLAE;
+
 //Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
 //var gridBuilder2D = new GridBuilder2D();
@@ -55,7 +63,7 @@
 //var stiffnessMatrixTemplatesProvider = new StiffnessMatrixTemplatesProvider();
 //var massMatrixTemplatesProvider = new MassMatrixTemplateProvider();
 
-//var derivativeCalculator = new DerivativeCalculator();
+var derivativeCalculator = new DerivativeCalculator();
 
 //var localAssembler =
 //    new LocalAssembler(new LocalMatrixAssembler(grid, stiffnessMatrixTemplatesProvider, massMatrixTemplatesProvider),
@@ -96,8 +104,6 @@
 //var potentialDifference = femSolution.CalculatePotentialDifference(new Node2D(1.05, -10d), new Node2D(1.05, -13d));
 //Console.WriteLine(potentialDifference);
 
-using DirectProblem.Core.GridComponents;
-
 var sourceA1 = new Source(new Node2D(0, -500), 1d);
 var sourceB1 = new Source(new Node2D(100, -500), 1d);
 var sourceA2 = new Source(new Node2D(0, 0), 2d);
@@ -112,5 +118,20 @@ var receiverN2 = new Receiver(new Node2D(600, 0));
 var receiverM3 = new Receiver(new Node2D(1000, 0));
 var receiverN3 = new Receiver(new Node2D(1100, 0));
 
+var sigma = 0.01;
+
 var sourcesLines = new[] { (sourceA1, sourceB1), (sourceA2, sourceB2), (sourceA3, sourceB3) };
 var receiversLines = new[] { (receiverM1, receiverN1), (receiverM2, receiverN2), (receiverM3, receiverN3) };
+
+var potentialDifferenceFunctionProvider = new PotentialDifferenceFunctionProvider(new PotentialDifferenceCalculator());
+var slaeAssembler = new SLAEAssembler(potentialDifferenceFunctionProvider, derivativeCalculator, 
+    sourcesLines, receiversLines, sigma);
+var gaussElimination = new GaussElimination();
+var regularizer = new Regularizer(gaussElimination);
+var inverseProblemSolver = new InverseProblemSolver(slaeAssembler, regularizer, gaussElimination);
+
+var solution = inverseProblemSolver
+    .SetInitialValues(1)
+    .Solve();
+
+Console.WriteLine();

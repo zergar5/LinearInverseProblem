@@ -9,7 +9,7 @@ using DirectProblem.FEM.Assembling.Global;
 using DirectProblem.FEM.Assembling.Local;
 using DirectProblem.TwoDimensional.Assembling.Local;
 
-namespace Electrostatics.TwoDimensional.Assembling.Global;
+namespace DirectProblem.TwoDimensional.Assembling.Global;
 
 public class GlobalAssembler<TNode>
 {
@@ -57,7 +57,7 @@ public class GlobalAssembler<TNode>
             //var localVector = _localAssembler.AssembleRightSide(element);
 
             _inserter.InsertMatrix(_equation.Matrix, localMatrix);
-            //_inserter.InsertVector(_equation.RightSide, localVector);
+            //_inserter.InsertVector(_equation.RightPart, localVector);
         }
 
         return this;
@@ -67,7 +67,7 @@ public class GlobalAssembler<TNode>
     {
         foreach (var condition in conditions)
         {
-            _inserter.InsertVector(_equation.RightSide, condition.Vector);
+            _inserter.InsertVector(_equation.RightPart, condition.Vector);
         }
 
         return this;
@@ -86,7 +86,7 @@ public class GlobalAssembler<TNode>
                 _bufferVector[i] = source.Current * basisFunctions[i].Calculate(source.Point);
             }
 
-            _inserter.InsertVector(_equation.RightSide, new LocalVector(element.NodesIndexes, _bufferVector));
+            _inserter.InsertVector(_equation.RightPart, new LocalVector(element.NodesIndexes, _bufferVector));
         }
 
 

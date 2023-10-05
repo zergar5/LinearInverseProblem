@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices.Marshalling;
+﻿using System.Numerics;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace DirectProblem.Core.Base;
 
@@ -10,7 +11,9 @@ public class Matrix
     {
         Values = matrix;
     }
-    public Matrix(int n) : this(new double[n, n]) { }
+    public Matrix(int size) : this(new double[size, size]) { }
+
+    public Matrix(int rows, int columns) : this(new double[rows, columns]) { }
 
     public int CountRows => Values.GetLength(0);
     public int CountColumns => Values.GetLength(1);
@@ -23,7 +26,7 @@ public class Matrix
 
     public static Matrix Sum(Matrix matrix1, Matrix matrix2, Matrix? result = null)
     {
-        if (matrix1.CountRows != matrix2.CountRows || matrix1.CountColumns != matrix2.CountColumns)
+        if (matrix1.CountRows != matrix2.CountColumns || matrix1.CountColumns != matrix2.CountRows)
             throw new ArgumentOutOfRangeException(
                 $"{nameof(matrix1)} and {nameof(matrix2)} must have same size");
 
@@ -42,7 +45,7 @@ public class Matrix
 
     public static Matrix Multiply(double coefficient, Matrix matrix, Matrix? result = null)
     {
-        result ??= new Matrix(matrix.CountRows);
+        result ??= new Matrix(matrix.CountRows, matrix.CountColumns);
 
         for (var i = 0; i < matrix.CountRows; i++)
         {
@@ -59,7 +62,7 @@ public class Matrix
     {
         if (matrix.CountRows != vector.Count)
             throw new ArgumentOutOfRangeException(
-                $"{nameof(matrix)} and {nameof(vector)} must have same size");
+                $"{nameof(matrix.CountRows)} and {nameof(vector)} must have same size");
 
         result ??= new Vector(vector.Count);
 
@@ -78,7 +81,7 @@ public class Matrix
     {
         if (matrix.CountRows != vector.Length || vector.Length != result.Length)
             throw new ArgumentOutOfRangeException(
-                $"{nameof(matrix)}, {nameof(vector)} and {nameof(result)} must have same size");
+                $"{nameof(matrix.CountRows)}, {nameof(vector)} and {nameof(result)} must have same size");
 
         for (var i = 0; i < matrix.CountRows; i++)
         {
@@ -97,5 +100,35 @@ public class Matrix
         {
             (Values[row2, i], Values[row1, i]) = (Values[row1, i], Values[row2, i]);
         }
+    }
+
+    public Matrix Clone()
+    {
+        var clone = (double[,])Values.Clone();
+
+        return new Matrix(clone);
+    }
+
+    public Matrix Copy(Matrix matrix)
+    {
+        if (matrix.CountRows != CountColumns || matrix.CountColumns != CountRows)
+            throw new ArgumentOutOfRangeException(
+                $"{nameof(Values)} and {nameof(matrix)} must have same size");
+
+        Array.Copy(Values, matrix.Values, CountRows);
+
+        return matrix;
+    }
+
+    public static Matrix CreateIdentityMatrix(int size)
+    {
+        var matrix = new Matrix(size);
+
+        for (var i = 0; i < matrix.CountRows; i++)
+        {
+            matrix[i, i] = 1d;
+        }
+
+        return matrix;
     }
 }

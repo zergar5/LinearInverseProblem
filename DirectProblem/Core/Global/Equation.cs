@@ -2,4 +2,4 @@
 
 namespace DirectProblem.Core.Global;
 
-public record Equation<TMatrix>(TMatrix Matrix, Vector Solution, Vector RightSide);
+public record Equation<TMatrix>(TMatrix Matrix, Vector Solution, Vector RightPart);

@@ -9,17 +9,22 @@ namespace InverseProblem.SLAE;
 
 public class GaussElimination
 {
-    public Vector Solve(Equation<Matrix> equation)
+    public Vector Solve(Matrix matrix, Vector rightPart)
     {
-        ForwardElimination(equation);
-        return BackSubstitution(equation);
+        try
+        {
+            ForwardElimination(matrix, rightPart);
+        }
+        catch (Exception)
+        {
+            throw new DivideByZeroException();
+        }
+        
+        return BackSubstitution(matrix, rightPart);
     }
 
-    private void ForwardElimination(Equation<Matrix> equation)
+    private void ForwardElimination(Matrix matrix, Vector rightPart)
     {
-        var matrix = equation.Matrix;
-        var b = equation.RightSide;
-
         for (var i = 0; i < matrix.CountRows - 1; i++)
         {
             var max = Math.Abs(matrix[i, i]);
@@ -37,7 +42,7 @@ public class GaussElimination
             if (rowNumber != i)
             {
                 matrix.SwapRows(i, rowNumber);
-                (b[i], b[rowNumber]) = (b[rowNumber], b[i]);
+                (rightPart[i], rightPart[rowNumber]) = (rightPart[rowNumber], rightPart[i]);
             }
 
             if (Math.Abs(matrix[i, i]) > MethodsConfig.Eps)
@@ -46,7 +51,7 @@ public class GaussElimination
                 {
                     var coefficient = matrix[j, i] / matrix[i, i];
                     matrix[j, i] = 0d;
-                    b[j] -= coefficient * b[i];
+                    rightPart[j] -= coefficient * rightPart[i];
 
                     for (var k = i + 1; k < matrix.CountRows; k++)
                     {
@@ -58,11 +63,9 @@ public class GaussElimination
         }
     }
 
-    private Vector BackSubstitution(Equation<Matrix> equation)
+    private Vector BackSubstitution(Matrix matrix, Vector rightPart)
     {
-        var matrix = equation.Matrix;
-        var solution = equation.Solution;
-        var b = equation.RightSide;
+        var result = rightPart;
 
         for (var i = matrix.CountRows - 1; i >= 0; i--)
         {
@@ -70,11 +73,11 @@ public class GaussElimination
 
             for (var j = i + 1; j < matrix.CountRows; j++)
             {
-                sum += matrix[i, j] * solution[j];
+                sum += matrix[i, j] * result[j];
             }
-            solution[i] = (b[i] - sum) / matrix[i, i];
+            result[i] = (rightPart[i] - sum) / matrix[i, i];
         }
 
-        return solution;
+        return result;
     }
 }

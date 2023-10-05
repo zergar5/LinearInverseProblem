@@ -11,12 +11,12 @@ public class GaussExcluder : IGaussExcluder<SymmetricSparseMatrix>
         for (var i = 0; i < condition.Values.Length; i++)
         {
             var row = condition.NodesIndexes[i];
-            equation.RightSide[row] = condition.Values[i];
+            equation.RightPart[row] = condition.Values[i];
             equation.Matrix[row, row] = 1d;
 
             foreach (var columnIndex in equation.Matrix[row])
             {
-                equation.RightSide[columnIndex] -= equation.Matrix[row, columnIndex] * condition.Values[i];
+                equation.RightPart[columnIndex] -= equation.Matrix[row, columnIndex] * condition.Values[i];
                 equation.Matrix[row, columnIndex] = 0d;
             }
 
@@ -26,7 +26,7 @@ public class GaussExcluder : IGaussExcluder<SymmetricSparseMatrix>
             {
                 if (!equation.Matrix[row].Contains(column)) continue;
 
-                equation.RightSide[row] -= equation.Matrix[row, column] * condition.Values[i];
+                equation.RightPart[row] -= equation.Matrix[row, column] * condition.Values[i];
                 equation.Matrix[row, column] = 0d;
             }
         }
