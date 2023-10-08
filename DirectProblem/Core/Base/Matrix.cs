@@ -68,6 +68,8 @@ public class Matrix
 
         for (var i = 0; i < matrix.CountRows; i++)
         {
+            result[i] = 0d;
+
             for (var j = 0; j < matrix.CountColumns; j++)
             {
                 result[i] += matrix[i, j] * vector[j];
@@ -115,14 +117,31 @@ public class Matrix
             throw new ArgumentOutOfRangeException(
                 $"{nameof(Values)} and {nameof(matrix)} must have same size");
 
-        Array.Copy(Values, matrix.Values, CountRows);
-
+        Array.Copy(Values, matrix.Values, matrix.Values.Length);
+        
         return matrix;
+    }
+
+    public void Clear()
+    {
+        Array.Clear(Values);
     }
 
     public static Matrix CreateIdentityMatrix(int size)
     {
         var matrix = new Matrix(size);
+
+        for (var i = 0; i < matrix.CountRows; i++)
+        {
+            matrix[i, i] = 1d;
+        }
+
+        return matrix;
+    }
+
+    public static Matrix CreateIdentityMatrix(Matrix matrix)
+    {
+        matrix.Clear();
 
         for (var i = 0; i < matrix.CountRows; i++)
         {

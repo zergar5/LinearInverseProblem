@@ -12,7 +12,7 @@ public class PotentialDifferenceFunctionProvider
         _potentialDifferenceCalculator = potentialDifferenceCalculator;
     }
 
-    public Func<double, double> CreateForOneSource((Source A, Source B) sourcesLine, (Receiver N, Receiver M) receiversLine, double sigma)
+    public Func<double, double> CreateForOneSource((Source A, Source B) sourcesLine, (Receiver M, Receiver N) receiversLine, double sigma)
     {
         return current => _potentialDifferenceCalculator.Calculate(sourcesLine, receiversLine, current, sigma);
     }
@@ -32,7 +32,7 @@ public class PotentialDifferenceFunctionProvider
             {
                 potentialDifference += 
                     _potentialDifferenceCalculator.Calculate(
-                        sourcesLines[i], receiversLine, sigma, currents[i]);
+                        sourcesLines[i], receiversLine, currents[i], sigma);
             }
 
             return potentialDifference;

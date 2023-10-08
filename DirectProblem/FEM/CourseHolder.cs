@@ -1,4 +1,5 @@
-﻿using DirectProblem.Core.GridComponents;
+﻿using DirectProblem.Core.Base;
+using DirectProblem.Core.GridComponents;
 
 namespace DirectProblem.FEM;
 

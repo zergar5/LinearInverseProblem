@@ -14,13 +14,12 @@ public class GaussElimination
         try
         {
             ForwardElimination(matrix, rightPart);
+            return BackSubstitution(matrix, rightPart);
         }
         catch (Exception)
         {
             throw new DivideByZeroException();
         }
-        
-        return BackSubstitution(matrix, rightPart);
     }
 
     private void ForwardElimination(Matrix matrix, Vector rightPart)
@@ -75,7 +74,9 @@ public class GaussElimination
             {
                 sum += matrix[i, j] * result[j];
             }
-            result[i] = (rightPart[i] - sum) / matrix[i, i];
+
+            if (Math.Abs(matrix[i, i]) > MethodsConfig.Eps) result[i] = (rightPart[i] - sum) / matrix[i, i];
+            else throw new DivideByZeroException();
         }
 
         return result;

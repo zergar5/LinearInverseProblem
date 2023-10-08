@@ -7,9 +7,9 @@ namespace InverseProblem.SLAE;
 public class Regularizer
 {
     private readonly GaussElimination _gaussElimination;
-    public Matrix IdentityMatrix { get; set; }
     public Matrix BufferMatrix { get; set; }
     public Vector BufferVector { get; set; }
+    public Vector ResidualBufferVector { get; set; }
 
     public Regularizer(GaussElimination gaussElimination)
     {
@@ -19,41 +19,14 @@ public class Regularizer
     public double Regularize(Equation<Matrix> equation, Vector trueCurrents)
     {
         var alpha = CalculateAlpha(equation.Matrix);
-        var error = CalculateError(equation.Solution, trueCurrents);
-        var ratio = 0d;
 
-        do
-        {
-            try
-            {
-                Matrix.Sum(equation.Matrix, Matrix.Multiply(alpha, IdentityMatrix, BufferMatrix), BufferMatrix);
+        alpha = FindPossibleAlpha(equation, alpha, trueCurrents, out var residual);
 
-                Vector.Subtract(
-                    equation.RightPart, Vector.Multiply(
-                        alpha, Vector.Subtract(equation.Solution, trueCurrents, BufferVector),
-                        BufferVector),
-                    BufferVector);
+        var ratio = 1d;
 
-                //BufferVector = equation.RightPart.Copy(BufferVector);
+        alpha = FindBestAlpha(equation, alpha, trueCurrents, residual);
 
-                BufferVector = _gaussElimination.Solve(BufferMatrix, BufferVector);
-
-                var currentError = CalculateError(
-                    Vector.Sum(equation.Solution, BufferVector, BufferVector), trueCurrents);
-
-                ratio = currentError / error;
-            }
-            catch
-            {
-                alpha *= 1.5;
-            }
-            finally
-            {
-                alpha *= 1.5;
-            }
-        } while (ratio < 2d);
-
-        return alpha / 1.5;
+        return alpha;
     }
 
     private double CalculateAlpha(Matrix matrix)
@@ -71,16 +44,86 @@ public class Regularizer
         return alpha;
     }
 
-    private double CalculateError(Vector currents, Vector trueCurrents)
+    private void AssembleSLAE(Equation<Matrix> equation, double alpha, Vector trueCurrents)
     {
-        var n = currents.Count;
-        var sum = 0d;
+        Matrix.CreateIdentityMatrix(BufferMatrix);
 
-        for (var i = 0; i < n; i++)
+        Matrix.Sum(equation.Matrix, Matrix.Multiply(alpha, BufferMatrix, BufferMatrix), BufferMatrix);
+
+        Vector.Subtract(
+            equation.RightPart, Vector.Multiply(
+                alpha, Vector.Subtract(equation.Solution, trueCurrents, BufferVector),
+                BufferVector),
+            BufferVector);
+    }
+
+    private double CalculateResidual(Equation<Matrix> equation, double alpha, Vector trueCurrents)
+    {
+        Matrix.CreateIdentityMatrix(BufferMatrix);
+
+        Matrix.Sum(equation.Matrix, Matrix.Multiply(alpha, BufferMatrix, BufferMatrix), BufferMatrix);
+
+        Matrix.Multiply(BufferMatrix, BufferVector, ResidualBufferVector);
+
+        Vector.Subtract(
+            equation.RightPart, Vector.Multiply(
+                alpha, Vector.Subtract(equation.Solution, trueCurrents, BufferVector),
+                BufferVector),
+            BufferVector);
+
+        return Vector.Subtract(
+            BufferVector,
+            ResidualBufferVector, BufferVector)
+            .Norm;
+    }
+
+    private double FindPossibleAlpha(Equation<Matrix> equation, double alpha, Vector trueCurrents, out double residual)
+    {
+        for (; ; )
         {
-            sum += Math.Pow(currents[i] - trueCurrents[i], 2);
+            try
+            {
+                AssembleSLAE(equation, alpha, trueCurrents);
+
+                BufferVector = _gaussElimination.Solve(BufferMatrix, BufferVector);
+
+                residual = CalculateResidual(equation, alpha, trueCurrents);
+
+                break;
+            }
+            catch { }
+            finally
+            {
+                alpha *= 1.5;
+            }
         }
 
-        return sum / n;
+        return alpha;
+    }
+
+    private double FindBestAlpha(Equation<Matrix> equation, double alpha, Vector trueCurrents, double residual)
+    {
+        var ratio = 1d;
+
+        do
+        {
+            try
+            {
+                AssembleSLAE(equation, alpha, trueCurrents);
+
+                BufferVector = _gaussElimination.Solve(BufferMatrix, BufferVector);
+
+                var currentResidual = CalculateResidual(equation, alpha, trueCurrents);
+
+                ratio = currentResidual / residual;
+            }
+            catch { }
+            finally
+            {
+                alpha *= 1.5;
+            }
+        } while (ratio is < 2d or > 3d);
+
+        return alpha / 1.5;
     }
 }
