@@ -38,11 +38,11 @@ var regularizer = new Regularizer(gaussElimination);
 var inverseProblemSolver = new InverseProblemSolver(slaeAssembler, regularizer, gaussElimination);
 
 var solution = inverseProblemSolver
-    .SetInitialValues(new[] { 1d, 1d, 1d})
+    .SetInitialValues(new[] { 2d, 3d, 4d})
     .Solve();
 
 Console.Write("Solution: ");
 foreach (var value in solution)
 {
-    Console.Write($"{value} ");
+    Console.Write($"{value:E14} ");
 }

@@ -133,7 +133,7 @@ public class SLAEAssembler
         {
             _equation.RightPart[q] = 0;
 
-            for (var i = 0; i < _equation.Matrix.CountColumns; i++)
+            for (var i = 0; i < _receiversLines.Length; i++)
             {
                 var potentialDifferenceFunction =
                     _potentialDifferenceFunctionProvider.CreateForSeveralSources(_sourcesLines, _receiversLines[i], _sigma);

@@ -47,7 +47,7 @@ public class Vector
     {
         result ??= new Vector(vector1.Count);
 
-        if (vector1.Count != vector2.Count) 
+        if (vector1.Count != vector2.Count)
             throw new ArgumentOutOfRangeException(
             $"{nameof(vector1)} and {nameof(vector2)} must have same size");
 
@@ -63,7 +63,7 @@ public class Vector
     {
         result ??= new Vector(vector1.Count);
 
-        if (vector1.Count != vector2.Count) 
+        if (vector1.Count != vector2.Count)
             throw new ArgumentOutOfRangeException(
             $"{nameof(vector1)} and {nameof(vector2)} must have same size");
 

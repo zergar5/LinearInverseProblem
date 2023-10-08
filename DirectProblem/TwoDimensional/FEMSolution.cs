@@ -1,6 +1,5 @@
 ﻿using DirectProblem.Core;
 using DirectProblem.Core.Base;
-using DirectProblem.Core.Global;
 using DirectProblem.Core.GridComponents;
 using DirectProblem.FEM;
 using DirectProblem.TwoDimensional.Assembling.Local;

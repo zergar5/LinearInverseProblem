@@ -1,5 +1,4 @@
 ﻿using DirectProblem.Core;
-using DirectProblem.Core.Base;
 using DirectProblem.Core.Boundary;
 using DirectProblem.Core.GridComponents;
 
@@ -23,7 +22,7 @@ public class FirstBoundaryProvider
 
         if (_buffers is null)
         {
-            _buffers = new double [conditionsValues.Length][];
+            _buffers = new double[conditionsValues.Length][];
 
             for (var i = 0; i < conditions.Length; i++)
             {

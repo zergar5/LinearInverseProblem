@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using System.Runtime.InteropServices.Marshalling;
-
-namespace DirectProblem.Core.Base;
+﻿namespace DirectProblem.Core.Base;
 
 public class Matrix
 {
@@ -118,7 +115,7 @@ public class Matrix
                 $"{nameof(Values)} and {nameof(matrix)} must have same size");
 
         Array.Copy(Values, matrix.Values, matrix.Values.Length);
-        
+
         return matrix;
     }
 

@@ -13,7 +13,6 @@ public class InverseProblemSolver
     private readonly Regularizer _regularizer;
     private readonly GaussElimination _gaussElimination;
     private Vector _trueCurrentsVector;
-    private Matrix _identityMatrix;
     private Matrix _bufferMatrix;
     private Vector _bufferVector;
     private Vector _residualBufferVector;
@@ -43,14 +42,12 @@ public class InverseProblemSolver
     {
         _slaeAssembler.CalculateTrueValues();
         _trueCurrentsVector = new Vector(_slaeAssembler.TrueCurrents);
-        _identityMatrix = Matrix.CreateIdentityMatrix(_trueCurrentsVector.Count);
-        _bufferMatrix = new Matrix(_trueCurrentsVector.Count);
+        _bufferMatrix = Matrix.CreateIdentityMatrix(_trueCurrentsVector.Count);
         _bufferVector = new Vector(_bufferMatrix.CountRows);
         _residualBufferVector = new Vector(_bufferVector.Count);
         _regularizer.BufferMatrix = _bufferMatrix;
         _regularizer.BufferVector = _bufferVector;
         _regularizer.ResidualBufferVector = _residualBufferVector;
-        _regularizer.BufferMatrix = _identityMatrix;
     }
 
     public Vector Solve()
@@ -66,9 +63,9 @@ public class InverseProblemSolver
 
             var alpha = _regularizer.Regularize(equation, _trueCurrentsVector);
 
-            Matrix.CreateIdentityMatrix(_identityMatrix);
+            Matrix.CreateIdentityMatrix(_bufferMatrix);
 
-            Matrix.Sum(equation.Matrix, Matrix.Multiply(alpha, _identityMatrix, _identityMatrix), equation.Matrix);
+            Matrix.Sum(equation.Matrix, Matrix.Multiply(alpha, _bufferMatrix, _bufferMatrix), equation.Matrix);
 
             Vector.Subtract(
                 equation.RightPart, Vector.Multiply(
@@ -76,10 +73,10 @@ public class InverseProblemSolver
                     _bufferVector),
                 equation.RightPart);
 
-            _identityMatrix = equation.Matrix.Copy(_identityMatrix);
+            _bufferMatrix = equation.Matrix.Copy(_bufferMatrix);
             _bufferVector = equation.RightPart.Copy(_bufferVector);
 
-            _bufferVector = _gaussElimination.Solve(_identityMatrix, _bufferVector);
+            _bufferVector = _gaussElimination.Solve(_bufferMatrix, _bufferVector);
 
             Vector.Sum(equation.Solution, _bufferVector, equation.Solution);
 
