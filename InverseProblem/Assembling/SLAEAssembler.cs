@@ -1,9 +1,9 @@
 ﻿using System.Numerics;
 using System.Runtime.Intrinsics;
+using DirectProblem.Calculus;
 using DirectProblem.Core.Base;
 using DirectProblem.Core.Global;
 using DirectProblem.Core.GridComponents;
-using Electrostatics.Calculus;
 using Vector = DirectProblem.Core.Base.Vector;
 
 namespace InverseProblem.Assembling;

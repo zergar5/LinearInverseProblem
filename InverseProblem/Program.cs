@@ -1,11 +1,11 @@
 ﻿using DirectProblem.Core.Base;
 using DirectProblem.Core.GridComponents;
-using Electrostatics.Calculus;
 using InverseProblem;
 using InverseProblem.Assembling;
 using InverseProblem.Calculus;
 using InverseProblem.SLAE;
 using System.Globalization;
+using DirectProblem.Calculus;
 
 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 

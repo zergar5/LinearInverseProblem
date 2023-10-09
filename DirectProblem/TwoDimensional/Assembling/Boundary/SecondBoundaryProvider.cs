@@ -1,11 +1,11 @@
-﻿using DirectProblem.Core;
+﻿using DirectProblem.Calculus;
+using DirectProblem.Core;
 using DirectProblem.Core.Base;
 using DirectProblem.Core.Boundary;
 using DirectProblem.Core.GridComponents;
 using DirectProblem.Core.Local;
 using DirectProblem.TwoDimensional.Assembling.MatrixTemplates;
 using DirectProblem.TwoDimensional.Parameters;
-using Electrostatics.Calculus;
 
 namespace DirectProblem.TwoDimensional.Assembling.Boundary;
 

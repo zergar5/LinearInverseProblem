@@ -1,7 +1,7 @@
 ﻿using DirectProblem.Core.GridComponents;
 using DirectProblem.TwoDimensional.Assembling.Local;
 
-namespace Electrostatics.Calculus;
+namespace DirectProblem.Calculus;
 
 public class DerivativeCalculator
 {
@@ -35,11 +35,6 @@ public class DerivativeCalculator
                      function(point with { Z = point.Z - Delta });
         }
         return result / (2.0 * Delta);
-    }
-
-    public double Calculate(Func<double, double> function, double variable)
-    {
-        return function(variable + Delta) - function(variable - Delta) / (2.0 * Delta);
     }
 
     public double Calculate(Func<double[], double> function, double[] variables, int variableIndex)
